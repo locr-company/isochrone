@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 
 /**
- * bin/isodist.js
+ * bin/isochrone.js
  *
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
- * @example node bin/isodist.js --lon=9.86557 --lat=52.3703 -s 2 -s 5 -s 7 -r 0.1 -h 0.5 -m niedersachsen-latest
+ * @example node bin/isochrone.js --lon=8.8071646 --lat=53.0758196 -r 5 -c 0.2 -i 1 -i 3 -i 5 --deintersect -m bremen
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
 const _			= require('lodash');
-const log		= require('../src/util/log');
 const OSRM		= require('osrm');
 const Path		= require('path');
-const { IsoDist, VALID_PROVIDERS }	= require('..');
-const StdIn		= require('../src/util/stdin');
 const Yargs		= require('yargs');
+const { IsoChrone, VALID_PROVIDERS }	= require('../src');
+const StdIn		= require('../src/util/stdin');
+const log		= require('../src/util/log');
 
 /**
  * Process CLI arguments
@@ -23,24 +23,29 @@ const Yargs		= require('yargs');
 const argv = Yargs
 	.alias('m', 'map')
 	.describe('map', 'OSRM file to use for routing')
-	.alias('s', 'step')
-	.describe('step', 'Distances where to compute isodistance polygons')
-	.alias('r', 'resolution')
-	.default('r', 0.2)
-	.describe('r', 'Sampling resolution of point grid')
-	.alias('h', 'hex-size')
-	.default('h', 0.5)
-	.describe('h', 'Size of hex grid cells')
+	.alias('r', 'radius')
+	.default('r', 5)
+	.describe('r', 'distance to draw the buffer')
+	.alias('c', 'cell-size')
+	.default('c', 0.1)
+	.describe('c', 'the distance across each cell')
+	.alias('i', 'interval')
+	.describe('interval', 'intervals for isochrones in minutes')
 	.alias('p', 'profile')
 	.default('p', 'car')
 	.describe('p', 'Routing profile to use (car, motorbike, pedestrian...)')
+	.alias('u', 'units')
+	.default('units', 'kilometers')
+	.describe('units', 'any of the options supported by turf units')
 	.default('provider', 'osrm')
 	.describe('provider', 'Routing provider (osrm, valhalla)')
 	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
-	.boolean('no-deburr')
-	.describe('no-deburr', 'Disable removal of isolated "islands" from isodistance result')
+	.default('concavity', 2)
+	.describe('concavity', 'relative measure of concavity')
+	.default('length-threshold', 0)
+	.describe('length-threshold', 'length threshold')
 	.boolean('deintersect')
-	.describe('deintersect', 'Deintersects all polygons')
+	.describe('deintersect', 'whether or not to deintersect the isochrones. If this is true, then the isochrones will be mutually exclusive')
 	.argv;
 
 /**
@@ -49,10 +54,9 @@ const argv = Yargs
 StdIn()
 	.then(options => {
 		/**
-		 * Generate separate steps and data entries
+		 * Generate intervals entries
 		 */
-		options.data = _.keyBy(options.steps, 'distance');
-		options.steps = _.map(options.steps, 'distance');
+		options.intervals = _.map(options.intervals, 'interval');
 
 		/**
 		 * Generate the origin point if not specified
@@ -70,18 +74,12 @@ StdIn()
 		/**
 		 * Generate steps
 		 */
-		if (argv.step) {
-			options.steps = [].concat(argv.step);
+		if (argv.interval) {
+			options.intervals = [].concat(argv.interval);
 		}
-		if (!options.steps || !options.steps.length) {
-			log.fail('Could not determine isodistance steps');
+		if (!options.intervals || !options.intervals.length) {
+			log.fail('Could not determine isodistance intervals');
 		}
-		const data = {};
-		for(let i = 0; i < options.steps.length; i++) {
-			data[options.steps[i]] = { distance: options.steps[i] };
-		}
-
-		options.data = data;
 
 		/**
 		 * Copy over -h, -r and -m
@@ -89,12 +87,14 @@ StdIn()
 		options = _.defaults(options, {
 			deintersect: argv.deintersect || false,
 			endpoint: argv.endpoint,
-			hexSize: argv.h,
+			cellSize: argv.c,
 			map: argv.m,
-			noDeburr: argv.noDeburr || false,
 			profile: argv.profile || 'car',
 			provider: argv.provider || 'osrm',
-			resolution: argv.r
+			radius: argv.r,
+			concavity: argv.concavity,
+			lengthThreshold: argv['length-threshold'],
+			units: argv.units
 		});
 
 		if (VALID_PROVIDERS.indexOf(options.provider) === -1) {
@@ -115,7 +115,7 @@ StdIn()
 					/**
 					 * Resolve the options path
 					 */
-					const mapName = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
+					const mapName = Path.resolve(__dirname, `../data/osrm/${options.map}.osrm`);
 					options.osrm = new OSRM(mapName);
 				}
 				break;
@@ -130,7 +130,7 @@ StdIn()
 		/**
 		 * Start processing
 		 */
-		return IsoDist(options.origin, options.steps, options);
+		return IsoChrone(options.origin, options);
 	})
 	.then(fc => {
 		const output = JSON.stringify(fc, null, 2);
@@ -139,8 +139,7 @@ StdIn()
 	})
 	.catch(err => {
 		if (!err.known) {
-			// eslint-disable-next-line no-console
-			console.error(err.stack);
+			log.fail(err.stack);
 		}
 		process.exit(1);
 	});

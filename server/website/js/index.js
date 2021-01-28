@@ -1,4 +1,4 @@
-class IsoDistDemo {
+class IsoChroneDemo {
 	constructor() {
 		this._center = [ 53.0758196, 8.8071646 ];
 		this._map = L.map('map').setView(this._center, 13);
@@ -6,7 +6,8 @@ class IsoDistDemo {
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(this._map);
 
-		L.control.isodist({ position: 'topright' })
+		L.control
+			.isochrone({ position: 'topright' })
 			.addTo(this._map);
 
 		this._marker = L.marker(this._center, {
@@ -14,96 +15,74 @@ class IsoDistDemo {
 		});
 		this._marker.addTo(this._map);
 		this._marker.on('moveend', (evt) => {
-			this.refreshIsoDist(evt.target.getLatLng());
+			this.refreshIsoChrone(evt.target.getLatLng());
 		});
 		this._polygons = [];
 		this._circles = [];
 
-		this.refreshIsoDist(this._marker.getLatLng());
+		this.refreshIsoChrone(this._marker.getLatLng());
 	}
 
-	get DisplayRadius() {
-		let displayRadius = false;
+	get Interval1() {
+		let interval = 1;
 
-		const displayRadiusInput = document.getElementById('isodist-display-radius');
-		if (displayRadiusInput instanceof HTMLInputElement) {
-			displayRadius = displayRadiusInput.checked;
-		}
-
-		return displayRadius;
-	}
-
-	get Distance1() {
-		let distance = 1;
-
-		const distanceInput = document.getElementById('isodist-distance-1');
-		if (distanceInput instanceof HTMLInputElement) {
-			const parsedInput = parseFloat(distanceInput.value);
+		const intervalInput = document.getElementById('isochrone-interval-1');
+		if (intervalInput instanceof HTMLInputElement) {
+			const parsedInput = parseFloat(intervalInput.value);
 			if (!isNaN(parsedInput)) {
-				distance = parsedInput;
+				interval = parsedInput;
 			}
 		}
 
-		return distance;
+		return interval;
 	}
 
-	get Distance2() {
-		let distance = 1;
+	get Interval2() {
+		let interval = 1;
 
-		const distanceInput = document.getElementById('isodist-distance-2');
-		if (distanceInput instanceof HTMLInputElement) {
-			const parsedInput = parseFloat(distanceInput.value);
+		const intervalInput = document.getElementById('isochrone-interval-2');
+		if (intervalInput instanceof HTMLInputElement) {
+			const parsedInput = parseFloat(intervalInput.value);
 			if (!isNaN(parsedInput)) {
-				distance = parsedInput;
+				interval = parsedInput;
 			}
 		}
 
-		return distance;
+		return interval;
 	}
 
-	get Distance3() {
-		let distance = 1;
+	get Interval3() {
+		let interval = 1;
 
-		const distanceInput = document.getElementById('isodist-distance-3');
-		if (distanceInput instanceof HTMLInputElement) {
-			const parsedInput = parseFloat(distanceInput.value);
+		const intervalInput = document.getElementById('isochrone-interval-3');
+		if (intervalInput instanceof HTMLInputElement) {
+			const parsedInput = parseFloat(intervalInput.value);
 			if (!isNaN(parsedInput)) {
-				distance = parsedInput;
+				interval = parsedInput;
 			}
 		}
 
-		return distance;
+		return interval;
 	}
 
-	get HexSize() {
-		let hexSize = 1;
+	get CellSize() {
+		let cellSize = 0.1;
 
-		const hexSizeInput = document.getElementById('isodist-hex-size');
-		if (hexSizeInput instanceof HTMLInputElement) {
-			const parsedInput = parseFloat(hexSizeInput.value);
+		const cellSizeInput = document.getElementById('isochrone-cell-size');
+		if (cellSizeInput instanceof HTMLInputElement) {
+			const parsedInput = parseFloat(cellSizeInput.value);
 			if (!isNaN(parsedInput)) {
-				hexSize = parsedInput;
+				cellSize = parsedInput;
 			}
 		}
 
-		return hexSize;
-	}
-
-	get NoDeburr() {
-		let noDeburr = false;
-
-		const noDeburrInput = document.getElementById('isodist-no-deburr');
-		if (noDeburrInput instanceof HTMLInputElement) {
-			noDeburr = noDeburrInput.checked;
-		}
-
-		return noDeburr;
+		return cellSize;
 	}
 
 	get Provider() {
 		let provider = '';
 
-		const providerSelect = document.getElementById('isodist-provider');
+		const providerSelect = document.getElementById('isochrone-provider');
 		if (providerSelect instanceof HTMLSelectElement) {
 			provider = providerSelect.value;
 		}
@@ -111,41 +90,27 @@ class IsoDistDemo {
 		return provider;
 	}
 
-	get Resolution() {
-		let resolution = 1;
-
-		const resolutionInput = document.getElementById('isodist-resolution');
-		if (resolutionInput instanceof HTMLInputElement) {
-			const parsedInput = parseFloat(resolutionInput.value);
-			if (!isNaN(parsedInput)) {
-				resolution = parsedInput;
-			}
-		}
-
-		return resolution;
-	}
-
 	getMarkerCenter() {
 		return this._marker.getLatLng();
 	}
 
-	refreshIsoDist(center) {
-		const applyChangesButton = document.getElementById('isodist-apply-settings');
+	refreshIsoChrone(center) {
+		const applyChangesButton = document.getElementById('isochrone-apply-settings');
 		if (applyChangesButton instanceof HTMLButtonElement) {
 			applyChangesButton.disabled = true;
 		}
 
-		const steps = [{
-			distance: this.Distance1
+		const intervals = [{
+			interval: this.Interval1
 		}];
-		if (this.Distance2 > 0) {
-			steps.push({
-				distance: this.Distance2
+		if (this.Interval2 > 0) {
+			intervals.push({
+				interval: this.Interval2
 			});
 		}
-		if (this.Distance3 > 0) {
-			steps.push({
-				distance: this.Distance3
+		if (this.Interval3 > 0) {
+			intervals.push({
+				interval: this.Interval3
 			});
 		}
 		const inputJson = {
@@ -155,11 +120,8 @@ class IsoDistDemo {
 			},
 			map: 'bremen',
 			deintersect: true,
-			hexSize: this.HexSize,
-			noDeburr: this.NoDeburr,
 			provider: this.Provider,
-			resolution: this.Resolution,
-			steps: steps
+			intervals: intervals
 		};
 	
 		const options = {
@@ -249,12 +211,6 @@ class IsoDistDemo {
 									polygon.addTo(this._map);
 									this._polygons.push(polygon);
 
-									if (this.DisplayRadius && feature.properties && feature.properties.distance) {
-										const circle = L.circle(this.getMarkerCenter(), { color: color, fill: false, radius: feature.properties.distance * 1000 });
-										circle.addTo(this._map);
-										this._circles.push(circle);
-									}
-
 									polygonCounter++;
 									break;
 								
@@ -266,12 +222,6 @@ class IsoDistDemo {
 									const multiPolygon = L.polygon(multiCoordinates, { color: color });
 									multiPolygon.addTo(this._map);
 									this._polygons.push(multiPolygon);
-
-									if (this.DisplayRadius && feature.properties && feature.properties.distance) {
-										const circle = L.circle(this.getMarkerCenter(), { color: color, fill: false, radius: feature.properties.distance * 1000 });
-										circle.addTo(this._map);
-										this._circles.push(circle);
-									}
 
 									polygonCounter++;
 									break;
@@ -305,57 +255,57 @@ class IsoDistDemo {
 	}
 }
 
-let isodistDemo = null;
+let isochroneDemo = null;
 
-L.Control.IsoDist = L.Control.extend({
+L.Control.IsoChrone = L.Control.extend({
 	onAdd: function(_map) {
 		const buildNumberInputRow = function(col1Content, inputId, defaults) {
 			const tRowDistance = document.createElement('tr');
-			const tColDistance1 = document.createElement('td');
-			tColDistance1.appendChild(document.createTextNode(col1Content));
-			tRowDistance.appendChild(tColDistance1);
-			const tColDistance2 = document.createElement('td');
-			tColDistance2.style.width = '75px';
-			const distanceInput = document.createElement('input');
-			distanceInput.id = inputId;
-			distanceInput.type = 'number';
+			const tColInterval1 = document.createElement('td');
+			tColInterval1.appendChild(document.createTextNode(col1Content));
+			tRowDistance.appendChild(tColInterval1);
+			const tColInterval2 = document.createElement('td');
+			tColInterval2.style.width = '75px';
+			const input = document.createElement('input');
+			input.id = inputId;
+			input.type = 'number';
 			if (defaults) {
 				if (typeof defaults.value === 'number') {
-					distanceInput.value = defaults.value;
+					input.value = defaults.value;
 				}
 				if (typeof defaults.min === 'number') {
-					distanceInput.min = defaults.min;
+					input.min = defaults.min;
 				}
 				if (typeof defaults.step === 'number') {
-					distanceInput.step = defaults.step;
+					input.step = defaults.step;
 				}
 			}
-			distanceInput.style.width = '100%';
-			tColDistance2.appendChild(distanceInput);
-			tRowDistance.appendChild(tColDistance2);
+			input.style.width = '100%';
+			tColInterval2.appendChild(input);
+			tRowDistance.appendChild(tColInterval2);
 
 			return tRowDistance;
 		};
 
 		const container = document.createElement('div');
 		container.classList.add('leaflet-bar');
-		container.id = 'isodist-control';
+		container.id = 'isochrone-control';
 		container.addEventListener('dblclick', evt => {
 			evt.stopPropagation();
 		});
 
-		const isodistImg = document.createElement('img');
-		isodistImg.id = 'isodist-control-symbol';
-		isodistImg.src = 'gfx/svg/favicon.svg';
-		isodistImg.width = 32;
-		isodistImg.height = 32;
-		isodistImg.style.position = 'absolute';
-		isodistImg.style.top = '-1px';
-		isodistImg.style.right = '-1px';
-		container.appendChild(isodistImg);
+		const isochroneImg = document.createElement('img');
+		isochroneImg.id = 'isochrone-control-symbol';
+		isochroneImg.src = 'gfx/svg/favicon.svg';
+		isochroneImg.width = 32;
+		isochroneImg.height = 32;
+		isochroneImg.style.position = 'absolute';
+		isochroneImg.style.top = '-1px';
+		isochroneImg.style.right = '-1px';
+		container.appendChild(isochroneImg);
 
 		const contentContainer = document.createElement('div');
-		contentContainer.id = 'isodist-control-content';
+		contentContainer.id = 'isochrone-control-content';
 
 		const table = document.createElement('table');
 		const tBody = document.createElement('tbody');
@@ -368,7 +318,7 @@ L.Control.IsoDist = L.Control.extend({
 		tColProvider1.appendChild(document.createTextNode('provider'));
 		const tColProvider2 = document.createElement('td');
 		const providerSelect = document.createElement('select')
-		providerSelect.id = 'isodist-provider';
+		providerSelect.id = 'isochrone-provider';
 		providerSelect.style.width = '100%';
 		const providers = ['osrm', 'valhalla'];
 		for(const provider of providers) {
@@ -382,84 +332,41 @@ L.Control.IsoDist = L.Control.extend({
 		tRowProvider.appendChild(tColProvider2);
 		tBody.appendChild(tRowProvider);
 
-		const tRowDistance1 = buildNumberInputRow('distance 1 (km):', 'isodist-distance-1', { value: 2, min: 0.1, step: 0.1 });
-		tBody.appendChild(tRowDistance1);
+		const tRowInterval1 = buildNumberInputRow('interval 1 (min):', 'isochrone-interval-1', { value: 2, min: 0.1, step: 0.1 });
+		tBody.appendChild(tRowInterval1);
 
-		const tRowDistance2 = buildNumberInputRow('distance 2 (km):', 'isodist-distance-2', { value: 0, min: 0, step: 0.1 });
-		tBody.appendChild(tRowDistance2);
+		const tRowInterval2 = buildNumberInputRow('interval 2 (min):', 'isochrone-interval-2', { value: 0, min: 0, step: 0.1 });
+		tBody.appendChild(tRowInterval2);
 
-		const tRowDistance3 = buildNumberInputRow('distance 3 (km):', 'isodist-distance-3', { value: 0, min: 0, step: 0.1 });
-		tBody.appendChild(tRowDistance3);
+		const tRowInterval3 = buildNumberInputRow('interval 3 (min):', 'isochrone-interval-3', { value: 0, min: 0, step: 0.1 });
+		tBody.appendChild(tRowInterval3);
 
-		const tRowResolution = document.createElement('tr');
-		const tColResolution1 = document.createElement('td');
-		tColResolution1.appendChild(document.createTextNode('resolution:'));
-		tRowResolution.appendChild(tColResolution1);
-		const tColResolution2 = document.createElement('td');
-		tColResolution2.style.width = '75px';
-		const resolutionInput = document.createElement('input');
-		resolutionInput.id = 'isodist-resolution';
-		resolutionInput.type = 'number';
-		resolutionInput.value = 0.2;
-		resolutionInput.min = 0.1;
-		resolutionInput.step = 0.1;
-		resolutionInput.style.width = '100%';
-		tColResolution2.appendChild(resolutionInput);
-		tRowResolution.appendChild(tColResolution2);
-		tBody.appendChild(tRowResolution);
-
-		const tRowHexSize = document.createElement('tr');
-		const tColHexSize1 = document.createElement('td');
-		tColHexSize1.appendChild(document.createTextNode('hex-size:'));
-		tRowHexSize.appendChild(tColHexSize1);
-		const tColHexSize2 = document.createElement('td');
-		tColHexSize2.style.width = '75px';
-		const hexSizeInput = document.createElement('input');
-		hexSizeInput.id = 'isodist-hex-size';
-		hexSizeInput.type = 'number';
-		hexSizeInput.value = 0.5;
-		hexSizeInput.min = 0;
-		hexSizeInput.step = 0.1;
-		hexSizeInput.style.width = '100%';
-		tColHexSize2.appendChild(hexSizeInput);
-		tRowHexSize.appendChild(tColHexSize2);
-		tBody.appendChild(tRowHexSize);
-
-		const tRowNoDeburr = document.createElement('tr');
-		const tColNoDeburr1 = document.createElement('td');
-		tColNoDeburr1.appendChild(document.createTextNode('no-deburr:'));
-		tRowNoDeburr.appendChild(tColNoDeburr1);
-		const tColNoDeburr2 = document.createElement('td');
-		tColNoDeburr2.style.textAlign = 'center';
-		const noDeburrInput = document.createElement('input');
-		noDeburrInput.id = 'isodist-no-deburr';
-		noDeburrInput.type = 'checkbox';
-		tColNoDeburr2.appendChild(noDeburrInput);
-		tRowNoDeburr.appendChild(tColNoDeburr2);
-		tBody.appendChild(tRowNoDeburr);
-
-		const tRowDisplayRadius = document.createElement('tr');
-		const tColDisplayRadius1 = document.createElement('td');
-		tColDisplayRadius1.appendChild(document.createTextNode('display radius:'));
-		tRowDisplayRadius.appendChild(tColDisplayRadius1);
-		const tColDisplayRadius2 = document.createElement('td');
-		tColDisplayRadius2.style.textAlign = 'center';
-		const displayRadiusInput = document.createElement('input');
-		displayRadiusInput.id = 'isodist-display-radius';
-		displayRadiusInput.type = 'checkbox';
-		tColDisplayRadius2.appendChild(displayRadiusInput);
-		tRowDisplayRadius.appendChild(tColDisplayRadius2);
-		tBody.appendChild(tRowDisplayRadius);
+		const tRowCellSize = document.createElement('tr');
+		const tColCellSize1 = document.createElement('td');
+		tColCellSize1.appendChild(document.createTextNode('cell-size:'));
+		tRowCellSize.appendChild(tColCellSize1);
+		const tColCellSize2 = document.createElement('td');
+		tColCellSize2.style.width = '75px';
+		const cellSizeInput = document.createElement('input');
+		cellSizeInput.id = 'isochrone-cell-size';
+		cellSizeInput.type = 'number';
+		cellSizeInput.value = 0.1;
+		cellSizeInput.min = 0.1;
+		cellSizeInput.step = 0.1;
+		cellSizeInput.style.width = '100%';
+		tColCellSize2.appendChild(cellSizeInput);
+		tRowCellSize.appendChild(tColCellSize2);
+		tBody.appendChild(tRowCellSize);
 
 		const tFootRow = document.createElement('tr');
 		const tFootCol = document.createElement('td');
 		tFootCol.colSpan = 2;
 		tFootCol.style.textAlign = 'center';
 		const applyChangesButton = document.createElement('button');
-		applyChangesButton.id = 'isodist-apply-settings';
+		applyChangesButton.id = 'isochrone-apply-settings';
 		applyChangesButton.appendChild(document.createTextNode('apply'));
 		applyChangesButton.addEventListener('click', () => {
-			isodistDemo.refreshIsoDist(isodistDemo.getMarkerCenter());
+			isochroneDemo.refreshIsoChrone(isochroneDemo.getMarkerCenter());
 		});
 		tFootCol.appendChild(applyChangesButton);
 		tFootRow.appendChild(tFootCol);
@@ -479,10 +386,10 @@ L.Control.IsoDist = L.Control.extend({
 	}
 });
 
-L.control.isodist = function(opts) {
-	return new L.Control.IsoDist(opts);
+L.control.isochrone = function(opts) {
+	return new L.Control.IsoChrone(opts);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	isodistDemo = new IsoDistDemo();
+	isochroneDemo = new IsoChroneDemo();
 });

@@ -12,13 +12,14 @@ const _				= require('lodash');
 const BodyParser	= require('body-parser');
 const Cors			= require('cors');
 const Express		= require('express');
-const { IsoDist, VALID_PROVIDERS }	= require('..');
+const { IsoChrone, VALID_PROVIDERS }	= require('..');
 const OSRM			= require('osrm');
 const Path			= require('path');
 const Yargs			= require('yargs');
 const log			= require('../src/util/log');
 
 const apiTimeout = 30 * 60 * 1000;
+let concurrentCalculations = 0;
 
 /**
  * Process CLI arguments
@@ -26,10 +27,10 @@ const apiTimeout = 30 * 60 * 1000;
 const argv = Yargs
 	.default('osrm-use-node-binding', false)
 	.boolean('osrm-use-node-binding')
-	.default('osrm-endpoint', 'http://127.0.0.1:5000/route/v1/')
-	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
-	.default('valhalla-endpoint', 'http://127.0.0.1:8002/route')
-	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/route)')
+	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/')
+	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/table/v1/)')
+	.default('valhalla-endpoint', 'http://127.0.0.1:8002/isochrone')
+	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/isochrone)')
 	.argv;
 
 const app = Express();
@@ -37,6 +38,20 @@ app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
 
+app.get('/api/status.json', (req, res) => {
+	const json = {
+		server: {
+			type: 'nodejs',
+			platform: process.platform,
+			version: process.version
+		},
+		processes: {
+			count: concurrentCalculations
+		}
+	};
+	res.setHeader('Content-Type', 'application/json');
+	res.end(JSON.stringify(json));
+});
 app.post('/api/', (req, res) => {
 	req.setTimeout(apiTimeout);
 	run(req.body)
@@ -157,8 +172,7 @@ app.listen(httpPort, () => {
 
 // Parse the parameter and call isodist
 function run(options) {
-options.data = _.keyBy(options.steps, 'distance');
-	options.steps = _.map(options.steps, 'distance');
+	options.intervals = _.map(options.intervals, 'interval');
 
 	let endpoint = '';
 	if (options.provider === 'osrm') {
@@ -168,12 +182,16 @@ options.data = _.keyBy(options.steps, 'distance');
 	}
 
 	options = _.defaults(options, {
+		cellSize: 0.1,
+		concavity: 2,
 		deintersect: false,
 		endpoint: endpoint,
-		hexSize: 0.5,
+		lengthThreshold: 0,
+		map: '',
 		profile: 'car',
 		provider: 'osrm',
-		resolution: 0.2
+		radius: 5,
+		units: 'kilometers'
 	});
 
 	if (VALID_PROVIDERS.indexOf(options.provider) === -1) {
@@ -201,5 +219,10 @@ options.data = _.keyBy(options.steps, 'distance');
 			break;
 	}
 
-	return IsoDist(options.origin, options.steps, options);
+	try {
+		concurrentCalculations++;
+		return IsoChrone(options.origin, options);
+	} finally {
+		concurrentCalculations--;
+	}
 }

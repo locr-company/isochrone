@@ -6,8 +6,8 @@ RUN wget https://deb.nodesource.com/setup_12.x -O nodejs_12.x.sh && bash nodejs_
 RUN apt-get install -y nodejs
 
 # copy application to docker container
-COPY . /isodist
-WORKDIR /isodist
+COPY . /isochrone
+WORKDIR /isochrone
 
 RUN npm set unsafe-perm true
 RUN npm install

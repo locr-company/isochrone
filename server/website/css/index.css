@@ -16,24 +16,24 @@ input {
 	height: 100%;
 }
 
-#isodist-control {
+#isochrone-control {
 	background-color: white;
 	position: relative;
 	width: 30px;
 	height: 30px;
 }
-#isodist-control:hover {
+#isochrone-control:hover {
 	width: initial;
 	height: initial;
 	min-width: 30px;
 	min-height: 30px;
 }
-#isodist-control-content {
+#isochrone-control-content {
 	display: none;
 }
-#isodist-control:hover #isodist-control-symbol {
+#isochrone-control:hover #isochrone-control-symbol {
 	display: none;
 }
-#isodist-control:hover #isodist-control-content {
+#isochrone-control:hover #isochrone-control-content {
 	display: block;
 }

@@ -49,5 +49,8 @@ build
 osrm/
 !osrm/*.md
 
+data/osrm/
+data/valhalla/
+
 *.json
 !package.json
