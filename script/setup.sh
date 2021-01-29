@@ -11,9 +11,9 @@ OSRM_DESTINATION="./third_party/osrm-backend"
 SUDO_COMMAND=`sudo --version`
 if [ $? -ne 0 ]
 then
-	apt install -y sudo
 	export DEBIAN_FRONTEND=noninteractive
 	ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+	apt install -y sudo
 fi
 
 #

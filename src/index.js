@@ -11,7 +11,6 @@ const http = require('http');
 const https = require('https');
 const bbox = require('@turf/bbox').default;
 const concaveman = require('concaveman');
-const deintersect = require('turf-deintersect');
 const destination = require('@turf/destination').default;
 const helpers = require('@turf/helpers');
 const pointGrid = require('@turf/point-grid').default;
@@ -165,11 +164,11 @@ async function isochroneOSRM(parameters, options) {
 	return result;
 }
 
-async function isochroneValhalla(parameters, options) {
-	let json = {
+async function isochroneValhalla(startPoint, options) {
+	const json = {
 		locations: [{
-			lat: parameters.startPoint[1],
-			lon: parameters.startPoint[0]
+			lat: startPoint[1],
+			lon: startPoint[0]
 		}],
 		costing: 'auto',
 		contours: [],
@@ -199,7 +198,15 @@ async function isochroneValhalla(parameters, options) {
 
 /**
  * @param {GeoJSON} origin Example: { type: "Point", coordinates: [ 9.86557, 52.3703 ] }
- * @param {Object} options 
+ * @param {Object} options object
+ * @param {number} options.cellSize - the distance across each cell as in [@turf/point-grid](https://github.com/Turfjs/turf/tree/master/packages/turf-point-grid)
+ * @param {number} [options.concavity=2] - relative measure of concavity as in [concaveman](https://github.com/mapbox/concaveman)
+ * @param {boolean} options.deintersect - wether or not to deintersect the isochrones. If this is true, then the isochrones will be mutually exclusive.
+ * @param {Array.<number>} options.intervals - intervals for isochrones in minutes
+ * @param {number} [options.lengthThreshold=0] - length threshold as in [concaveman](https://github.com/mapbox/concaveman)
+ * @param {number} options.radius - distance to draw the buffer as in [@turf/buffer](https://github.com/Turfjs/turf/tree/master/packages/turf-buffer)
+ * @param {string} [options.units='kilometers'] - any of the options supported by turf units
+ * @returns {Promise} GeoJSON FeatureCollection of Polygons when resolved
  */
 function IsoChrone(origin, options) {
 	return new Promise((resolve, reject) => {
@@ -215,9 +222,20 @@ function IsoChrone(origin, options) {
 					const pointsByInterval = groupByInterval(table.destinations, options.intervals, travelTime);
 					const polygons = makePolygons(pointsByInterval, options);
 
-					const features = options.deintersect ? deintersect(polygons) : polygons;
-					const featureCollection = rewind(helpers.featureCollection(features));
+					const featureCollection = rewind(helpers.featureCollection(polygons));
 					featureCollection.features.reverse();
+					if (options.deintersect && featureCollection.features.length > 1) {
+						for(let i = 0; i < featureCollection.features.length - 1; i++) {
+							for(let j = i; j < featureCollection.features.length - 1; j++) {
+								const properties = Object.assign({}, featureCollection.features[i].properties);
+								featureCollection.features[i] = turf.union(featureCollection.features[i], featureCollection.features[j + 1]);
+								featureCollection.features[i].properties = properties;
+							}
+						}
+						for(let i = 0; i < featureCollection.features.length - 1; i++) {
+							featureCollection.features[i] = turf.difference(featureCollection.features[i], featureCollection.features[i + 1]);
+						}
+					}
 
 					resolve(featureCollection);
 				} catch (e) {
@@ -239,9 +257,9 @@ function IsoChrone(origin, options) {
 					break;
 				
 				case 'valhalla':
-						isochroneValhalla({ startPoint }, options)
-							.then(resolve)
-							.catch(reject);
+					isochroneValhalla(startPoint, options)
+						.then(resolve)
+						.catch(reject);
 					break;
 			}
 		} catch (e) {

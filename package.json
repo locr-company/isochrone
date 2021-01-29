@@ -27,9 +27,10 @@
     "npm": ">=6"
   },
   "scripts": {
+    "clean": "./script/clean.sh",
     "install": "./script/setup.sh",
-    "start": "cd server && node index.js",
-    "prepare": "./script/prepare.sh"
+    "prepare": "./script/prepare.sh",
+    "start": "cd server && node index.js"
   },
   "devDependencies": {
     "ava": "~3.15.0",
@@ -53,7 +54,6 @@
     "@mapbox/polyline": "~1.1.1",
     "@turf/turf": "~6.2.0",
     "axios": "~0.21.1",
-    "bluebird": "~3.7.2",
     "body-parser": "~1.19.0",
     "chalk": "~4.1.0",
     "concaveman": "1.1.1",
@@ -63,7 +63,6 @@
     "lodash": "~4.17.20",
     "osrm": "file:./third_party/osrm-backend",
     "single-line-log": "~1.1.2",
-    "turf-deintersect": "1.0.4",
     "yargs": "~16.2.0"
   },
   "keywords": [],

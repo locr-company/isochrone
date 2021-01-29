@@ -23,6 +23,31 @@ class IsoChroneDemo {
 		this.refreshIsoChrone(this._marker.getLatLng());
 	}
 
+	get CellSize() {
+		let cellSize = 0.1;
+
+		const cellSizeInput = document.getElementById('isochrone-cell-size');
+		if (cellSizeInput instanceof HTMLInputElement) {
+			const parsedInput = parseFloat(cellSizeInput.value);
+			if (!isNaN(parsedInput)) {
+				cellSize = parsedInput;
+			}
+		}
+
+		return cellSize;
+	}
+
+	get Deintersect() {
+		let deintersect = false;
+
+		const deintersectInput = document.getElementById('isochrone-deintersect');
+		if (deintersectInput instanceof HTMLInputElement) {
+			deintersect = deintersectInput.checked;
+		}
+
+		return deintersect;
+	}
+
 	get Interval1() {
 		let interval = 1;
 
@@ -65,20 +90,6 @@ class IsoChroneDemo {
 		return interval;
 	}
 
-	get CellSize() {
-		let cellSize = 0.1;
-
-		const cellSizeInput = document.getElementById('isochrone-cell-size');
-		if (cellSizeInput instanceof HTMLInputElement) {
-			const parsedInput = parseFloat(cellSizeInput.value);
-			if (!isNaN(parsedInput)) {
-				cellSize = parsedInput;
-			}
-		}
-
-		return cellSize;
-	}
-
 	get Provider() {
 		let provider = '';
 
@@ -88,6 +99,20 @@ class IsoChroneDemo {
 		}
 
 		return provider;
+	}
+
+	get Radius() {
+		let radius = -1;
+
+		const radiusInput = document.getElementById('isochrone-radius');
+		if (radiusInput instanceof HTMLInputElement) {
+			const parsedInput = parseFloat(radiusInput.value);
+			if (!isNaN(parsedInput)) {
+				radius = parsedInput;
+			}
+		}
+
+		return radius;
 	}
 
 	getMarkerCenter() {
@@ -119,9 +144,10 @@ class IsoChroneDemo {
 				coordinates: [ center.lng, center.lat ]
 			},
 			map: 'bremen',
-			deintersect: true,
+			deintersect: this.Deintersect,
 			provider: this.Provider,
-			intervals: intervals
+			intervals: intervals,
+			radius: this.Radius
 		};
 	
 		const options = {
@@ -259,13 +285,41 @@ let isochroneDemo = null;
 
 L.Control.IsoChrone = L.Control.extend({
 	onAdd: function(_map) {
+		const buildCheckboxInputRow = function(col1Content, inputId, defaults) {
+			const tRow = document.createElement('tr');
+			const tCol1 = document.createElement('td');
+			const label = document.createElement('label');
+			label.setAttribute('for', inputId);
+			label.appendChild(document.createTextNode(col1Content));
+			tCol1.appendChild(label);
+			tRow.appendChild(tCol1);
+			const tCol2 = document.createElement('td');
+			tCol2.style.width = '75px';
+			const input = document.createElement('input');
+			input.id = inputId;
+			input.type = 'checkbox';
+			if (defaults) {
+				if (typeof defaults.checked === 'boolean') {
+					input.checked = defaults.checked;
+				}
+			}
+			input.style.width = '100%';
+			tCol2.appendChild(input);
+			tRow.appendChild(tCol2);
+
+			return tRow;
+		};
+
 		const buildNumberInputRow = function(col1Content, inputId, defaults) {
-			const tRowDistance = document.createElement('tr');
-			const tColInterval1 = document.createElement('td');
-			tColInterval1.appendChild(document.createTextNode(col1Content));
-			tRowDistance.appendChild(tColInterval1);
-			const tColInterval2 = document.createElement('td');
-			tColInterval2.style.width = '75px';
+			const tRow = document.createElement('tr');
+			const tCol1 = document.createElement('td');
+			const label = document.createElement('label');
+			label.setAttribute('for', inputId);
+			label.appendChild(document.createTextNode(col1Content));
+			tCol1.appendChild(label);
+			tRow.appendChild(tCol1);
+			const tCol2 = document.createElement('td');
+			tCol2.style.width = '75px';
 			const input = document.createElement('input');
 			input.id = inputId;
 			input.type = 'number';
@@ -281,10 +335,34 @@ L.Control.IsoChrone = L.Control.extend({
 				}
 			}
 			input.style.width = '100%';
-			tColInterval2.appendChild(input);
-			tRowDistance.appendChild(tColInterval2);
+			tCol2.appendChild(input);
+			tRow.appendChild(tCol2);
 
-			return tRowDistance;
+			return tRow;
+		};
+
+		const buildSelectRow = function(col1Content, selectId, values) {
+			const tRow = document.createElement('tr');
+			const tCol1 = document.createElement('td');
+			const label = document.createElement('label');
+			label.setAttribute('for', selectId);
+			label.appendChild(document.createTextNode(col1Content));
+			tCol1.appendChild(label);
+			const tCol2 = document.createElement('td');
+			const select = document.createElement('select')
+			select.id = selectId;
+			select.style.width = '100%';
+			for(const provider of values) {
+				const providerOption = document.createElement('option');
+				providerOption.value = provider;
+				providerOption.appendChild(document.createTextNode(provider));
+				select.appendChild(providerOption);
+			}
+			tCol2.appendChild(select);
+			tRow.appendChild(tCol1);
+			tRow.appendChild(tCol2);
+			
+			return tRow;
 		};
 
 		const container = document.createElement('div');
@@ -313,23 +391,7 @@ L.Control.IsoChrone = L.Control.extend({
 		table.appendChild(tBody);
 		table.appendChild(tFoot);
 
-		const tRowProvider = document.createElement('tr');
-		const tColProvider1 = document.createElement('td');
-		tColProvider1.appendChild(document.createTextNode('provider'));
-		const tColProvider2 = document.createElement('td');
-		const providerSelect = document.createElement('select')
-		providerSelect.id = 'isochrone-provider';
-		providerSelect.style.width = '100%';
-		const providers = ['osrm', 'valhalla'];
-		for(const provider of providers) {
-			const providerOption = document.createElement('option');
-			providerOption.value = provider;
-			providerOption.appendChild(document.createTextNode(provider));
-			providerSelect.appendChild(providerOption);
-		}
-		tColProvider2.appendChild(providerSelect);
-		tRowProvider.appendChild(tColProvider1);
-		tRowProvider.appendChild(tColProvider2);
+		const tRowProvider = buildSelectRow('provider:', 'isochrone-provider', ['osrm', 'valhalla']);
 		tBody.appendChild(tRowProvider);
 
 		const tRowInterval1 = buildNumberInputRow('interval 1 (min):', 'isochrone-interval-1', { value: 2, min: 0.1, step: 0.1 });
@@ -341,22 +403,14 @@ L.Control.IsoChrone = L.Control.extend({
 		const tRowInterval3 = buildNumberInputRow('interval 3 (min):', 'isochrone-interval-3', { value: 0, min: 0, step: 0.1 });
 		tBody.appendChild(tRowInterval3);
 
-		const tRowCellSize = document.createElement('tr');
-		const tColCellSize1 = document.createElement('td');
-		tColCellSize1.appendChild(document.createTextNode('cell-size:'));
-		tRowCellSize.appendChild(tColCellSize1);
-		const tColCellSize2 = document.createElement('td');
-		tColCellSize2.style.width = '75px';
-		const cellSizeInput = document.createElement('input');
-		cellSizeInput.id = 'isochrone-cell-size';
-		cellSizeInput.type = 'number';
-		cellSizeInput.value = 0.1;
-		cellSizeInput.min = 0.1;
-		cellSizeInput.step = 0.1;
-		cellSizeInput.style.width = '100%';
-		tColCellSize2.appendChild(cellSizeInput);
-		tRowCellSize.appendChild(tColCellSize2);
+		const tRowRadius = buildNumberInputRow('radius (km):', 'isochrone-radius', { value: -1, min: -1, step: 1 });
+		tBody.appendChild(tRowRadius);
+
+		const tRowCellSize = buildNumberInputRow('cell-size (km):', 'isochrone-cell-size', { value: 0.1, min: 0.1, step: 0.1 });
 		tBody.appendChild(tRowCellSize);
+
+		const tRowDeintersect = buildCheckboxInputRow('deintersect:', 'isochrone-deintersect', { checked: true });
+		tBody.appendChild(tRowDeintersect);
 
 		const tFootRow = document.createElement('tr');
 		const tFootCol = document.createElement('td');

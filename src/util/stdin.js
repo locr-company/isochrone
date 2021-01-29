@@ -1,34 +1,30 @@
 /**
  * util/stdin.js
  *
- * @author  Denis Luchkin-Zhou <denis@ricepo.com>
- * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
+ * @author  Ringo Leese <r.leese@locr.com>
+ * @license MIT
  */
-const Bluebird     = require('bluebird');
-
 function stdin() {
-	return new Bluebird(
-		(resolve, reject) => {
-			const stream = process.stdin;
-			const chunks = [];
+	return new Promise((resolve, reject) => {
+		const stream = process.stdin;
+		const chunks = [];
 
-			if (stream.isTTY) {
-				resolve({ });
-			}
-
-			stream.setEncoding('utf8');
-			stream.on('data', d => chunks.push(d));
-			stream.on('end', () => {
-				if (chunks.length === 0) {
-					resolve({ });
-				}
-				const input = chunks.join('');
-				resolve(JSON.parse(input));
-			});
-
-			stream.on('error', e => reject(e));
+		if (stream.isTTY) {
+			return resolve({});
 		}
-	);
+
+		stream.setEncoding('utf8');
+		stream.on('data', d => chunks.push(d));
+		stream.on('end', () => {
+			if (chunks.length === 0) {
+				return resolve({});
+			}
+			const input = chunks.join('');
+			return resolve(JSON.parse(input));
+		});
+
+		stream.on('error', reject);
+	});
 }
 
 module.exports = stdin;

@@ -13,7 +13,6 @@ const BodyParser	= require('body-parser');
 const Cors			= require('cors');
 const Express		= require('express');
 const { IsoChrone, VALID_PROVIDERS }	= require('..');
-const OSRM			= require('osrm');
 const Path			= require('path');
 const Yargs			= require('yargs');
 const log			= require('../src/util/log');
@@ -190,9 +189,15 @@ function run(options) {
 		map: '',
 		profile: 'car',
 		provider: 'osrm',
-		radius: 5,
+		radius: -1,
 		units: 'kilometers'
 	});
+
+	if (options.radius <= 0) {
+		const maxMinutes = Math.max(...options.intervals);
+		// 120km/h / 60mins * maxMinutes
+		options.radius = 120 / 60 * maxMinutes;
+	}
 
 	if (VALID_PROVIDERS.indexOf(options.provider) === -1) {
 		throw new Error(`Invalid provider (${options.provider})`);
@@ -208,10 +213,11 @@ function run(options) {
 				 * Resolve the options path
 				 */
 				const mapName = Path.resolve(__dirname, `../data/osrm/${options.map}.osrm`);
+				const OSRM = require('osrm');
 				options.osrm = new OSRM(mapName);
 			}
 			break;
-		
+
 		case 'valhalla':
 			if (!options.endpoint) {
 				log.fail('Missing endpoint for provider: valhalla');
