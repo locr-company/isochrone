@@ -18,12 +18,16 @@ const Yargs			= require('yargs');
 const log			= require('../src/util/log');
 
 const apiTimeout = 30 * 60 * 1000;
+const defaultPort = 3456;
 let concurrentCalculations = 0;
 
 /**
  * Process CLI arguments
  */
 const argv = Yargs
+	.alias('p', 'port')
+	.default('p', defaultPort)
+	.describe('p', 'http-port to listen on.')
 	.default('osrm-use-node-binding', false)
 	.boolean('osrm-use-node-binding')
 	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/')
@@ -162,7 +166,7 @@ app.get('/api/', (req, res) => {
 		});
 });
 
-const httpPort = process.env.PORT || 3456;
+const httpPort = (argv.p || process.env.PORT) || defaultPort;
 
 // eslint-disable-next-line no-process-env
 app.listen(httpPort, () => {
