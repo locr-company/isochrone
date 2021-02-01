@@ -67,55 +67,76 @@ app.post('/api/', (req, res) => {
 		});
 });
 app.get('/api/', (req, res) => {
+	const sendBadRequest = function(message) {
+		const jsonResult = {
+			code: 400,
+			status: 'Bad Request',
+			message: message
+		};
+		res.status(400);
+		res.header('Content-Type', 'application/json');
+		res.json(jsonResult);
+	};
+
 	const query = req.query;
-	const distances = [];
-	if (!query.distances) {
-		log.fail('Missing required parameter "distances".');
+	const intervals = [];
+	if (!query.intervals) {
+		sendBadRequest('Missing required parameter "intervals"');
+		return;
 	}
-	const distancesSplitted = query.distances.split(',');
-	let distanceCounter = 0;
-	for(const distanceSplit of distancesSplitted) {
-		distanceCounter++;
-		const distance = parseFloat(distanceSplit);
-		if (isNaN(distance)) {
-			log.fail(`invalid distance[${distanceCounter}] => ${distanceSplit}`);
+	const intervalsSplitted = query.intervals.split(',');
+	let intervalCounter = 0;
+	for(const intervalsplit of intervalsSplitted) {
+		intervalCounter++;
+		const interval = parseFloat(intervalsplit);
+		if (isNaN(interval)) {
+			sendBadRequest(`invalid interval[${intervalCounter}] => ${intervalsplit}`);
+			return;
 		}
-		distances.push({
-			distance: distance
+		intervals.push({
+			interval: interval
 		});
 	}
 	if (!query.latitude) {
-		log.fail('Missing required parameter "latitude".');
+		sendBadRequest('Missing required parameter "latitude"');
+		return;
 	}
 	if (!query.longitude) {
-		log.fail('Missing required parameter "latitude".');
+		sendBadRequest('Missing required parameter "longitude"');
+		return;
 	}
 	const latitude = parseFloat(query.latitude);
 	const longitude = parseFloat(query.longitude);
 	if (isNaN(latitude)) {
-		log.fail(`Invalid "latitude" value => ${query.latitude}`);
+		sendBadRequest(`Invalid "latitude" value => ${query.latitude}`);
+		return;
 	}
 	if (isNaN(longitude)) {
-		log.fail(`Invalid "longitude" value => ${query.longitude}`);
+		sendBadRequest(`Invalid "longitude" value => ${query.longitude}`);
+		return;
 	}
 	let hexSize = 0.5;
 	if (query['hex_size']) {
 		hexSize = parseFloat(query['hex_size']);
 		if (isNaN(hexSize)) {
-			log.fail(`Invalid "hex_size" value => ${query['hex_size']}`);
+			sendBadRequest(`Invalid "hex_size" value => ${query['hex_size']}`);
+			return;
 		}
 		if (hexSize <= 0) {
-			log.fail(`Invalid "hex_size" value => ${hexSize}. It must be greater than 0.`);
+			sendBadRequest(`Invalid "hex_size" value => ${hexSize}. It must be greater than 0.`);
+			return;
 		}
 	}
 	let resolution = 0.2;
 	if (query.resolution) {
 		resolution = parseFloat(query.resolution);
 		if (isNaN(resolution)) {
-			log.fail(`Invalid "resolution" value => ${query.resolution}`);
+			sendBadRequest(`Invalid "resolution" value => ${query.resolution}`);
+			return;
 		}
 		if (resolution <= 0) {
-			log.fail(`Invalid "resolution" value => ${resolution}. It must be greater than 0.`);
+			sendBadRequest(`Invalid "resolution" value => ${resolution}. It must be greater than 0.`);
+			return;
 		}
 	}
 	let deintersect = false;
@@ -153,7 +174,7 @@ app.get('/api/', (req, res) => {
 		provider: query.provider || 'osrm',
 		profile: query.profile || 'car',
 		resolution: resolution,
-		steps: distances
+		steps: intervals
 	};
 
 	run(options)

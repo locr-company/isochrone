@@ -3,17 +3,25 @@
 This package can compute isochrone polygons based on driving time.  
 This repository is originally forked from https://github.com/locr-company/isodist and is mixed with code from https://github.com/stepankuzmin/node-isochrone
 
-## Prerequisites for Ubuntu 20.04
-```sh
-sudo apt install build-essential curl file git libtbb2 libtbb-dev lua5.3 liblua5.3-0 liblua5.3-dev libluabind-dev
-```
-
 ## Getting Started
 ```sh
 $ git clone git@github.com:locr-company/isochrone.git
 $ cd isochrone
 $ git submodule update --init --recursive
 $ npm install
+```
+
+## setup and prepare osrm
+```sh
+sudo apt install cmake g++ libtbb2 libtbb-dev libexpat1 libexpat1-dev bzip2 libbz2-1.0 libbz2-dev lua5.3 libluabind-dev liblua5.3-0 liblua5.3-dev libluajit-5.1-dev luajit zlib1g zlib1g-dev libboost-all-dev
+
+npm run setup-osrm
+npm run prepare-osrm
+```
+
+## setup and prepare valhalla
+```sh
+sudo apt install libsqlite3-mod-spatialite autoconf automake libzmq5 libzmq3-dev libczmq4 libczmq-dev curl libcurl4 libcurl4-openssl-dev libprotobuf-dev libgeos-dev libgeos++-dev protobuf-compiler spatialite-bin libsqlite3-dev libspatialite-dev libsqlite3-mod-spatialite lcov unzip
 ```
 
 In order to run `isochrone`, you will need to download an `*.osm` file corresponding to the region
@@ -28,7 +36,7 @@ $ npm run prepare
 Finally, you are good to go! In order to generate the graph above, you will need `bremen.osrm` and
 run the following:
 ```sh
-$ bin/isodist.js --lon=-86.893386 --lat=40.417202 -i 2 -i 5 -i 7 -m bremen
+$ bin/isochrone.js --lon=-86.893386 --lat=40.417202 -i 2 -i 5 -i 7 -m bremen
 ```
 
 ## Input file
@@ -54,12 +62,12 @@ You can specify all the parameters in an input file that is piped into standard 
 
 ```
 ```sh
-$ bin/isodist.js < input.json
+$ bin/isochrone.js < input.json
 ```
 
 Please note that CLI arguments always override values specified in the input file.
 ```sh
-$ bin/isodist.js --map il < input.json
+$ bin/isochrone.js --map il < input.json
 # The above command will use `data/osrm/il.osrm`
 ```
 
@@ -88,31 +96,6 @@ For example, to compute isodistance polygons at 1, 2, 5 and 10 kilometers, use
 **Required**.
 
 Name of the `.osrm` file you wish to use for routing.
-
-
-### `-r, --resolution`
-Optional, default: 0.2
-
-Sampling resolution of the underlying point grid. Larger values will result in less precise
-results but much faster processing. Smaller values will produce more precise results, but will
-require exponentially more processing time and memory.
-
-Having a very small resolution value may result in kinks (i.e. self-intersections) of isodistance
-polygons, which cause hex-fitting to fail. You can choose to ignore them by disabling hex-fitting,
-but note that presence of kinks usually indicates incorrect parameter choice.
-
-
-### `-h, --hex-size`
-Optional, default: 0.5
-
-Size of hex grid cells that isodistances are fitted onto. Passing a 0 value will disable
-hex grid fitting.
-
-
-### `--no-deburr`
-Optional, default: none
-
-This flag instructs `isodist` not to remove isolated "islands" from isodistance geometries.
 
 
 [0]: media/isochrone.png

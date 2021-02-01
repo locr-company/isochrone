@@ -13,3 +13,5 @@ done
 
 rm -rf ../data/osrm
 rm -rf ../data/valhalla
+
+rm -rf ../node_modules

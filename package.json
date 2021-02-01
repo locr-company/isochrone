@@ -28,27 +28,15 @@
   },
   "scripts": {
     "clean": "./script/clean.sh",
-    "install": "./script/setup.sh",
-    "prepare": "./script/prepare.sh",
+    "setup-osrm": "./script/setup-osrm.sh",
+    "setup-valhalla": "./script/setup-valhalla.sh",
+    "prepare-osrm": "./script/prepare-osrm.sh",
+    "prepare-valhalla": "./script/prepare-valhalla.sh",
     "start": "cd server && node index.js"
   },
   "devDependencies": {
-    "ava": "~3.15.0",
-    "babel-core": "~6.26.3",
-    "babel-eslint": "~10.1.0",
-    "babel-preset-stage-3": "~6.24.1",
-    "babel-register": "~6.26.0",
-    "del": "~6.0.0",
     "eslint": "~7.18.0",
-    "eslint-plugin-import": "~2.22.1",
-    "gulp": "~4.0.2",
-    "gulp-babel": "~8.0.0",
-    "gulp-changed": "~4.0.2",
-    "gulp-eslint": "~6.0.0",
-    "gulp-notify": "~3.2.0",
-    "gulp-sourcemaps": "~3.0.0",
-    "is-ci": "~2.0.0",
-    "nyc": "~15.1.0"
+    "eslint-plugin-import": "~2.22.1"
   },
   "dependencies": {
     "@mapbox/polyline": "~1.1.1",
@@ -65,27 +53,5 @@
     "single-line-log": "~1.1.2",
     "yargs": "~16.2.0"
   },
-  "keywords": [],
-  "ava": {
-    "files": [
-      "test/**/*.spec.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "babel": "inherit"
-  },
-  "nyc": {
-    "all": true,
-    "include": [
-      "src/**/*.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "reporter": [
-      "html",
-      "lcov"
-    ]
-  }
+  "keywords": []
 }
