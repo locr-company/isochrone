@@ -10,7 +10,6 @@
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
 const _			= require('lodash');
-const OSRM		= require('osrm');
 const Path		= require('path');
 const Yargs		= require('yargs');
 const { IsoChrone, VALID_PROVIDERS }	= require('../src');
@@ -39,7 +38,7 @@ const argv = Yargs
 	.describe('units', 'any of the options supported by turf units')
 	.default('provider', 'osrm')
 	.describe('provider', 'Routing provider (osrm, valhalla)')
-	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
+	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/table/v1/)')
 	.default('concavity', 2)
 	.describe('concavity', 'relative measure of concavity')
 	.default('length-threshold', 0)
@@ -116,6 +115,7 @@ StdIn()
 					 * Resolve the options path
 					 */
 					const mapName = Path.resolve(__dirname, `../data/osrm/${options.map}.osrm`);
+					const OSRM = require('osrm');
 					options.osrm = new OSRM(mapName);
 				}
 				break;

@@ -22,6 +22,9 @@ npm run prepare-osrm
 ## setup and prepare valhalla
 ```sh
 sudo apt install libsqlite3-mod-spatialite autoconf automake libzmq5 libzmq3-dev libczmq4 libczmq-dev curl libcurl4 libcurl4-openssl-dev libprotobuf-dev libgeos-dev libgeos++-dev protobuf-compiler spatialite-bin libsqlite3-dev libspatialite-dev libsqlite3-mod-spatialite lcov unzip
+
+npm run setup-valhalla
+npm run prepare-valhalla
 ```
 
 In order to run `isochrone`, you will need to download an `*.osm` file corresponding to the region
@@ -29,9 +32,6 @@ where you want to do your computation. [Geofabrik][1] is a good source of these 
 
 You need to place your OSM files into the `isochrone/data` directory (create one if it does not exist).
 Then run the following command to generate `.osrm` files:
-```sh
-$ npm run prepare
-```
 
 Finally, you are good to go! In order to generate the graph above, you will need `bremen.osrm` and
 run the following:

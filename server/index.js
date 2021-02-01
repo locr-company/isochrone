@@ -36,6 +36,27 @@ const argv = Yargs
 	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/isochrone)')
 	.argv;
 
+function sendBadRequest(message, res) {
+	const jsonResult = {
+		code: 400,
+		status: 'Bad Request',
+		message: message
+	};
+	res.status(400);
+	res.header('Content-Type', 'application/json');
+	res.json(jsonResult);
+}
+function sendInternalServerError(message, res) {
+	const jsonResult = {
+		code: 500,
+		status: 'Internal Server Error',
+		message: message
+	};
+	res.status(400);
+	res.header('Content-Type', 'application/json');
+	res.json(jsonResult);
+}
+
 const app = Express();
 app.use(Cors());
 app.use(BodyParser.json());
@@ -63,25 +84,14 @@ app.post('/api/', (req, res) => {
 		})
 		.catch((err) => {
 			log.warn(err);
-			res.status(500).send('Something broke!');
+			sendInternalServerError(err, res);
 		});
 });
 app.get('/api/', (req, res) => {
-	const sendBadRequest = function(message) {
-		const jsonResult = {
-			code: 400,
-			status: 'Bad Request',
-			message: message
-		};
-		res.status(400);
-		res.header('Content-Type', 'application/json');
-		res.json(jsonResult);
-	};
-
 	const query = req.query;
 	const intervals = [];
 	if (!query.intervals) {
-		sendBadRequest('Missing required parameter "intervals"');
+		sendBadRequest('Missing required parameter "intervals"', res);
 		return;
 	}
 	const intervalsSplitted = query.intervals.split(',');
@@ -90,7 +100,7 @@ app.get('/api/', (req, res) => {
 		intervalCounter++;
 		const interval = parseFloat(intervalsplit);
 		if (isNaN(interval)) {
-			sendBadRequest(`invalid interval[${intervalCounter}] => ${intervalsplit}`);
+			sendBadRequest(`invalid interval[${intervalCounter}] => ${intervalsplit}`, res);
 			return;
 		}
 		intervals.push({
@@ -98,44 +108,44 @@ app.get('/api/', (req, res) => {
 		});
 	}
 	if (!query.latitude) {
-		sendBadRequest('Missing required parameter "latitude"');
+		sendBadRequest('Missing required parameter "latitude"', res);
 		return;
 	}
 	if (!query.longitude) {
-		sendBadRequest('Missing required parameter "longitude"');
+		sendBadRequest('Missing required parameter "longitude"', res);
 		return;
 	}
 	const latitude = parseFloat(query.latitude);
 	const longitude = parseFloat(query.longitude);
 	if (isNaN(latitude)) {
-		sendBadRequest(`Invalid "latitude" value => ${query.latitude}`);
+		sendBadRequest(`Invalid "latitude" value => ${query.latitude}`, res);
 		return;
 	}
 	if (isNaN(longitude)) {
-		sendBadRequest(`Invalid "longitude" value => ${query.longitude}`);
+		sendBadRequest(`Invalid "longitude" value => ${query.longitude}`, res);
 		return;
 	}
-	let hexSize = 0.5;
-	if (query['hex_size']) {
-		hexSize = parseFloat(query['hex_size']);
-		if (isNaN(hexSize)) {
-			sendBadRequest(`Invalid "hex_size" value => ${query['hex_size']}`);
+	let cellSize = 0.1;
+	if (query['cell_size']) {
+		cellSize = parseFloat(query['cell_size']);
+		if (isNaN(cellSize)) {
+			sendBadRequest(`Invalid "cell_size" value => ${query['cell_size']}`, res);
 			return;
 		}
-		if (hexSize <= 0) {
-			sendBadRequest(`Invalid "hex_size" value => ${hexSize}. It must be greater than 0.`);
+		if (cellSize <= 0) {
+			sendBadRequest(`Invalid "cell_size" value => ${cellSize}. It must be greater than 0.`, res);
 			return;
 		}
 	}
-	let resolution = 0.2;
-	if (query.resolution) {
-		resolution = parseFloat(query.resolution);
-		if (isNaN(resolution)) {
-			sendBadRequest(`Invalid "resolution" value => ${query.resolution}`);
+	let radius = -1;
+	if (query.radius) {
+		radius = parseFloat(query.radius);
+		if (isNaN(radius)) {
+			sendBadRequest(`Invalid "radius" value => ${query.radius}`, res);
 			return;
 		}
-		if (resolution <= 0) {
-			sendBadRequest(`Invalid "resolution" value => ${resolution}. It must be greater than 0.`);
+		if (radius < -1) {
+			sendBadRequest(`Invalid "radius" value => ${radius}. It must be greater than 0.`, res);
 			return;
 		}
 	}
@@ -150,17 +160,6 @@ app.get('/api/', (req, res) => {
 				break;
 		}
 	}
-	let noDeburr = false;
-	if (query.noDeburr) {
-		switch(query.noDeburr) {
-			case '1':
-			case 'true':
-			case 'yes':
-			case 'on':
-				noDeburr = true;
-				break;
-		}
-	}
 
 	const options = {
 		origin: {
@@ -169,21 +168,27 @@ app.get('/api/', (req, res) => {
 		},
 		map: query.map || '',
 		deintersect: deintersect,
-		hexSize: hexSize,
-		noDeburr: noDeburr,
+		cellSize: cellSize,
 		provider: query.provider || 'osrm',
 		profile: query.profile || 'car',
-		resolution: resolution,
-		steps: intervals
+		radius: radius,
+		intervals: intervals
 	};
 
+	console.log(options);
 	run(options)
 		.then(data => {
 			res.json(data);
 		})
 		.catch(err => {
 			log.warn(err);
-			res.status(500).send('Something broke!');
+			let errorMessage = '';
+			if (err instanceof Error) {
+				errorMessage = err.message;
+			} else {
+				errorMessage = err;
+			}
+			sendInternalServerError(errorMessage, res);
 		});
 });
 
@@ -215,7 +220,7 @@ function run(options) {
 		profile: 'car',
 		provider: 'osrm',
 		radius: -1,
-		units: 'kilometers'
+		unit: 'kilometers'
 	});
 
 	if (options.radius <= 0) {
