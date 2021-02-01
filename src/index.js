@@ -72,6 +72,9 @@ function httpGetJSONPromise(url) {
 			if (statusCode !== 200) {
 				error = new Error(`invalid statusCode(${statusCode}) from server.`);
 			}
+			if (!contentType) {
+				error = new Error(`no contentType from server received.`);
+			}
 			if (!contentType.match(/application\/json/)) {
 				error = new Error(`invalid contentType(${contentType}) from server.`);
 			}
