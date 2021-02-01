@@ -37,8 +37,8 @@ const groupByInterval = (destinations, intervals, travelTime) => {
 	const groups = {};
 	intervals.forEach((interval) => {
 		const points = destinations
-		.filter((point, index) => travelTime[index] !== null && travelTime[index] <= interval * 60)
-		.map(d => d.location);
+			.filter((point, index) => travelTime[index] !== null && travelTime[index] <= interval * 60)
+			.map(d => d.location);
 
 		groups[interval] = points;
 	});
@@ -68,12 +68,12 @@ function httpGetJSONPromise(url) {
 			const { statusCode } = res;
 			const contentType = res.headers['content-type'];
 			let error;
-	
+
 			if (statusCode !== 200) {
 				error = new Error(`invalid statusCode(${statusCode}) from server.`);
 			}
 			if (!contentType) {
-				error = new Error(`no contentType from server received.`);
+				error = new Error('no contentType from server received.');
 			}
 			if (contentType && !contentType.match(/application\/json/)) {
 				error = new Error(`invalid contentType(${contentType}) from server.`);
@@ -82,18 +82,18 @@ function httpGetJSONPromise(url) {
 				res.resume();
 				return reject(error);
 			}
-	
+
 			res.setEncoding('utf8');
 			let rawData = '';
-			res.on('data', chunk => rawData += chunk);
+			res.on('data', chunk => {
+				rawData += chunk;
+			});
 			res.on('end', () => {
 				try {
 					const parsedData = JSON.parse(rawData);
 					resolve(parsedData);
 				} catch(e) {
-					if (callback) {
-						reject(e);
-					}
+					reject(e);
 				}
 			});
 		};
@@ -114,7 +114,7 @@ async function isochroneOSRM(parameters, options) {
 	for(let i = 0; i < totalRequests; i++) {
 		let url = `${options.endpoint}${options.profile}/${coordinates[0][0]},${coordinates[0][1]}`;
 		let coordinateCounter = 0;
-		let firstRequestOffset = (i === 0) ? 1 : 0;
+		const firstRequestOffset = (i === 0) ? 1 : 0;
 		for(let j = i * coordinatesPerRequest + firstRequestOffset; j < i * coordinatesPerRequest + coordinatesPerRequest; j++) {
 			const coordinate = coordinates[j];
 			if (!coordinate) {
@@ -129,8 +129,8 @@ async function isochroneOSRM(parameters, options) {
 		url += `?sources=${parameters.sources.join(';')}`;
 		urls.push(url);
 	}
-	
-	let result = {
+
+	const result = {
 		code: 'Error',
 		durations: [[0]],
 		sources: [],
@@ -241,15 +241,16 @@ function IsoChrone(origin, options) {
 					}
 
 					resolve(featureCollection);
-				} catch (e) {
+				} catch(e) {
 					reject(e);
 				}
 			};
+
+			let coordinates;
 			const startPoint = origin.coordinates;
 			switch(options.provider) {
 				case 'osrm':
-					const endPoints = makeGrid(startPoint, options);
-					const coordinates = [startPoint].concat(endPoints);
+					coordinates = [startPoint].concat(makeGrid(startPoint, options));
 					if (options.osrm) {
 						options.osrm.table({ sources: [0], coordinates }, osrmTableResultCallback);
 					} else {
@@ -258,14 +259,14 @@ function IsoChrone(origin, options) {
 							.catch(reject);
 					}
 					break;
-				
+
 				case 'valhalla':
 					isochroneValhalla(startPoint, options)
 						.then(resolve)
 						.catch(reject);
 					break;
 			}
-		} catch (e) {
+		} catch(e) {
 			reject(e);
 		}
 	});

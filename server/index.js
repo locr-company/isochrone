@@ -8,14 +8,14 @@
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-const _				= require('lodash');
-const BodyParser	= require('body-parser');
-const Cors			= require('cors');
-const Express		= require('express');
-const { IsoChrone, VALID_PROVIDERS }	= require('..');
-const Path			= require('path');
-const Yargs			= require('yargs');
-const log			= require('../src/util/log');
+const _ = require('lodash');
+const BodyParser = require('body-parser');
+const Cors = require('cors');
+const Express = require('express');
+const { IsoChrone, VALID_PROVIDERS } = require('..');
+const Path = require('path');
+const Yargs = require('yargs');
+const log = require('../src/util/log');
 
 const apiTimeout = 30 * 60 * 1000;
 const defaultPort = 3456;
@@ -126,10 +126,10 @@ app.get('/api/', (req, res) => {
 		return;
 	}
 	let cellSize = 0.1;
-	if (query['cell_size']) {
-		cellSize = parseFloat(query['cell_size']);
+	if (query.cell_size) {
+		cellSize = parseFloat(query.cell_size);
 		if (isNaN(cellSize)) {
-			sendBadRequest(`Invalid "cell_size" value => ${query['cell_size']}`, res);
+			sendBadRequest(`Invalid "cell_size" value => ${query.cell_size}`, res);
 			return;
 		}
 		if (cellSize <= 0) {
@@ -164,7 +164,7 @@ app.get('/api/', (req, res) => {
 	const options = {
 		origin: {
 			type: 'Point',
-			coordinates: [ longitude, latitude ]
+			coordinates: [longitude, latitude]
 		},
 		map: query.map || '',
 		deintersect: deintersect,

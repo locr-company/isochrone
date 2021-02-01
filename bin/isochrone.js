@@ -7,14 +7,13 @@
  * @license MIT
  * @example node bin/isochrone.js --lon=8.8071646 --lat=53.0758196 -r 5 -c 0.2 -i 1 -i 3 -i 5 --deintersect -m bremen
  */
-/* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-const _			= require('lodash');
-const Path		= require('path');
-const Yargs		= require('yargs');
-const { IsoChrone, VALID_PROVIDERS }	= require('../src');
-const StdIn		= require('../src/util/stdin');
-const log		= require('../src/util/log');
+const _ = require('lodash');
+const Path = require('path');
+const Yargs = require('yargs');
+const { IsoChrone, VALID_PROVIDERS } = require('../src');
+const StdIn = require('../src/util/stdin');
+const log = require('../src/util/log');
 
 /**
  * Process CLI arguments
@@ -66,7 +65,7 @@ StdIn()
 		if (argv.lat && argv.lon) {
 			options.origin = {
 				type: 'Point',
-				coordinates: [ argv.lon, argv.lat ]
+				coordinates: [argv.lon, argv.lat]
 			};
 		}
 
@@ -119,7 +118,7 @@ StdIn()
 					options.osrm = new OSRM(mapName);
 				}
 				break;
-			
+
 			case 'valhalla':
 				if (!options.endpoint) {
 					log.fail('Missing endpoint for provider: valhalla');
