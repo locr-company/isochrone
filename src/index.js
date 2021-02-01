@@ -75,7 +75,7 @@ function httpGetJSONPromise(url) {
 			if (!contentType) {
 				error = new Error(`no contentType from server received.`);
 			}
-			if (!contentType.match(/application\/json/)) {
+			if (contentType && !contentType.match(/application\/json/)) {
 				error = new Error(`invalid contentType(${contentType}) from server.`);
 			}
 			if (error) {
