@@ -1,26 +1,42 @@
+/* eslint-disable no-undef */
+
 class IsoChroneDemo {
 	constructor() {
-		this._center = [ 53.0758196, 8.8071646 ];
+		this._polygons = [];
+		this._circles = [];
+		this._marker = null;
+		this._center = [53.0758196, 8.8071646];
 		this._map = L.map('map').setView(this._center, 13);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(this._map);
 
-		L.control
-			.isochrone({ position: 'topright' })
-			.addTo(this._map);
+		fetch('api/providers/list')
+			.then(res => res.json())
+			.then(json => {
+				const controlOptions = {
+					position: 'topright'
+				};
+				if (json.providers) {
+					controlOptions.providers = json.providers;
+				}
+				if (json.default) {
+					controlOptions.defaultProvider = json.default;
+				}
+				L.control
+					.isochrone(controlOptions)
+					.addTo(this._map);
 
-		this._marker = L.marker(this._center, {
-			draggable: true
-		});
-		this._marker.addTo(this._map);
-		this._marker.on('moveend', (evt) => {
-			this.refreshIsoChrone(evt.target.getLatLng());
-		});
-		this._polygons = [];
-		this._circles = [];
+				this._marker = L.marker(this._center, {
+					draggable: true
+				});
+				this._marker.addTo(this._map);
+				this._marker.on('moveend', (evt) => {
+					this.refreshIsoChrone(evt.target.getLatLng());
+				});
 
-		this.refreshIsoChrone(this._marker.getLatLng());
+				this.refreshIsoChrone(this._marker.getLatLng());
+			});
 	}
 
 	get CellSize() {
@@ -141,7 +157,7 @@ class IsoChroneDemo {
 		const inputJson = {
 			origin: {
 				type: 'Point',
-				coordinates: [ center.lng, center.lat ]
+				coordinates: [center.lng, center.lat]
 			},
 			map: 'bremen',
 			deintersect: this.Deintersect,
@@ -149,7 +165,7 @@ class IsoChroneDemo {
 			intervals: intervals,
 			radius: this.Radius
 		};
-	
+
 		const options = {
 			method: 'POST',
 			headers: {
@@ -164,15 +180,15 @@ class IsoChroneDemo {
 					applyChangesButton.disabled = false;
 				}
 
-				let oldPolygon = undefined;
-				while(oldPolygon = this._polygons.pop()) {
+				let oldPolygon;
+				while((oldPolygon = this._polygons.pop())) {
 					oldPolygon.remove();
 				}
-				let oldCircle = undefined;
-				while(oldCircle = this._circles.pop()) {
+				let oldCircle;
+				while((oldCircle = this._circles.pop())) {
 					oldCircle.remove();
 				}
-	
+
 				if (!json.type) {
 					alert('no type found in geojson');
 					return;
@@ -185,7 +201,7 @@ class IsoChroneDemo {
 						for(const point of subCoordinates) {
 							leafletCoordinatesSub.push([point[1], point[0]]);
 						}
-						leafletCoordinates.push(leafletCoordinatesSub)
+						leafletCoordinates.push(leafletCoordinatesSub);
 					}
 
 					return leafletCoordinates;
@@ -193,19 +209,20 @@ class IsoChroneDemo {
 
 				const colors = ['lime', 'yellow', 'red'];
 				let polygonCounter = 0;
+				let featuresCount = 0;
 
 				switch(json.type) {
 					case 'Feature':
 						alert(`unhandled geojson-type: ${json.type}`);
 						break;
-					
+
 					case 'FeatureCollection':
 						if (!(json.features instanceof Array)) {
 							alert('geojson-features is not an array');
 							break;
 						}
 
-						const featuresCount = json.features.length;
+						featuresCount = json.features.length;
 						for(const feature of json.features) {
 							if (feature.type !== 'Feature') {
 								alert(`invalid geojson-feature-type: ${feature.type}`);
@@ -228,37 +245,41 @@ class IsoChroneDemo {
 								break;
 							}
 
-							let color = colors[featuresCount - 1 - polygonCounter] || 'white';
+							const color = colors[featuresCount - 1 - polygonCounter] || 'white';
 
+							let leafletCoordinates;
+							let polygon;
+							let multiPolygon;
+							let multiCoordinates;
 							switch(geometry.type) {
 								case 'Polygon':
-									const leafletCoordinates = reverseLatLongCoordinates(geometry.coordinates);
-									const polygon = L.polygon(leafletCoordinates, { color: color });
+									leafletCoordinates = reverseLatLongCoordinates(geometry.coordinates);
+									polygon = L.polygon(leafletCoordinates, { color: color });
 									polygon.addTo(this._map);
 									this._polygons.push(polygon);
 
 									polygonCounter++;
 									break;
-								
+
 								case 'MultiPolygon':
-									let multiCoordinates = geometry.coordinates;
-									for(let i in multiCoordinates) {
+									multiCoordinates = geometry.coordinates;
+									for(const i in multiCoordinates) {
 										multiCoordinates[i] = reverseLatLongCoordinates(multiCoordinates[i]);
 									}
-									const multiPolygon = L.polygon(multiCoordinates, { color: color });
+									multiPolygon = L.polygon(multiCoordinates, { color: color });
 									multiPolygon.addTo(this._map);
 									this._polygons.push(multiPolygon);
 
 									polygonCounter++;
 									break;
-								
+
 								default:
 									alert(`unhandled geometry-type: ${geometry.type}`);
 									break;
 							}
 						}
 						break;
-					
+
 					default:
 						alert(`invalid geojson-type: ${json.type}`);
 						break;
@@ -268,12 +289,12 @@ class IsoChroneDemo {
 				if (applyChangesButton instanceof HTMLButtonElement) {
 					applyChangesButton.disabled = false;
 				}
-				let oldPolygon = undefined;
-				while(oldPolygon = this._polygons.pop()) {
+				let oldPolygon;
+				while((oldPolygon = this._polygons.pop())) {
 					oldPolygon.remove();
 				}
-				let oldCircle = undefined;
-				while(oldCircle = this._circles.pop()) {
+				let oldCircle;
+				while((oldCircle = this._circles.pop())) {
 					oldCircle.remove();
 				}
 				alert(exc);
@@ -341,7 +362,7 @@ L.Control.IsoChrone = L.Control.extend({
 			return tRow;
 		};
 
-		const buildSelectRow = function(col1Content, selectId, values) {
+		const buildSelectRow = function(col1Content, selectId, values, defaultValue) {
 			const tRow = document.createElement('tr');
 			const tCol1 = document.createElement('td');
 			const label = document.createElement('label');
@@ -349,19 +370,22 @@ L.Control.IsoChrone = L.Control.extend({
 			label.appendChild(document.createTextNode(col1Content));
 			tCol1.appendChild(label);
 			const tCol2 = document.createElement('td');
-			const select = document.createElement('select')
+			const select = document.createElement('select');
 			select.id = selectId;
 			select.style.width = '100%';
 			for(const provider of values) {
 				const providerOption = document.createElement('option');
 				providerOption.value = provider;
+				if (provider === defaultValue) {
+					providerOption.selected = true;
+				}
 				providerOption.appendChild(document.createTextNode(provider));
 				select.appendChild(providerOption);
 			}
 			tCol2.appendChild(select);
 			tRow.appendChild(tCol1);
 			tRow.appendChild(tCol2);
-			
+
 			return tRow;
 		};
 
@@ -391,7 +415,14 @@ L.Control.IsoChrone = L.Control.extend({
 		table.appendChild(tBody);
 		table.appendChild(tFoot);
 
-		const tRowProvider = buildSelectRow('provider:', 'isochrone-provider', ['osrm', 'valhalla']);
+		const providers = [];
+		if (this.options.providers instanceof Array) {
+			for(const provider of this.options.providers) {
+				providers.push(provider);
+			}
+		}
+		const defaultProvider = this.options.defaultProvider || '';
+		const tRowProvider = buildSelectRow('provider:', 'isochrone-provider', providers, defaultProvider);
 		tBody.appendChild(tRowProvider);
 
 		const tRowInterval1 = buildNumberInputRow('interval 1 (min):', 'isochrone-interval-1', { value: 2, min: 0.1, step: 0.1 });
@@ -431,18 +462,12 @@ L.Control.IsoChrone = L.Control.extend({
 		container.appendChild(contentContainer);
 
 		return container;
-	},
-	_mouseover: function() {
-		console.log('_mouseover');
-	},
-	_mouseout: function() {
-		console.log('_mouseout');
 	}
 });
 
 L.control.isochrone = function(opts) {
 	return new L.Control.IsoChrone(opts);
-}
+};
 
 document.addEventListener('DOMContentLoaded', () => {
 	isochroneDemo = new IsoChroneDemo();

@@ -17,7 +17,8 @@ module.exports = {
 			overrides: {
 				catch: { after: false },
 				for: { after: false },
-				switch: { after: false }
+				switch: { after: false },
+				while: { after: false }
 			}
 		}],
 		'no-tabs': ['error', { allowIndentationTabs: true }],

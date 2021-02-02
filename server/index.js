@@ -28,6 +28,8 @@ const argv = Yargs
 	.alias('p', 'port')
 	.default('p', defaultPort)
 	.describe('p', 'http-port to listen on.')
+	.default('default-provider', 'osrm')
+	.describe('default-provider', 'which provider (' + VALID_PROVIDERS.join(', ') + ') to use as default')
 	.default('osrm-use-node-binding', false)
 	.boolean('osrm-use-node-binding')
 	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/')
@@ -62,6 +64,14 @@ app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
 
+app.get('/api/providers/list', (req, res) => {
+	const json = {
+		providers: VALID_PROVIDERS,
+		default: argv['default-provider']
+	};
+	res.setHeader('Content-Type', 'application/json');
+	res.end(JSON.stringify(json));
+});
 app.get('/api/status.json', (req, res) => {
 	const json = {
 		server: {
@@ -192,8 +202,10 @@ app.get('/api/', (req, res) => {
 });
 
 const httpPort = (argv.p || process.env.PORT) || defaultPort;
+if (VALID_PROVIDERS.indexOf(argv['default-provider']) === -1) {
+	log.fail(`invalid provider => ${argv['default-provider']}. Valid values are (${VALID_PROVIDERS.join(', ')}).`);
+}
 
-// eslint-disable-next-line no-process-env
 app.listen(httpPort, () => {
 	log.success(`Isodist server listening on port ${httpPort}!`);
 });
