@@ -167,6 +167,21 @@ async function isochroneOSRM(parameters, options) {
 	return result;
 }
 
+function deintersectGeoJSONFeatures(features) {
+	for(let i = 0; i < features.length - 1; i++) {
+		for(let j = i; j < features.length - 1; j++) {
+			const properties = Object.assign({}, features[i].properties);
+			features[i] = turf.union(features[i], features[j + 1]);
+			features[i].properties = properties;
+		}
+	}
+	for(let i = 0; i < features.length - 1; i++) {
+		features[i] = turf.difference(features[i], features[i + 1]);
+	}
+
+	return features;
+}
+
 async function isochroneValhalla(startPoint, options) {
 	const json = {
 		locations: [{
@@ -185,16 +200,7 @@ async function isochroneValhalla(startPoint, options) {
 	const url = `${options.endpoint}?json=${JSON.stringify(json)}`;
 	const result = await httpGetJSONPromise(url);
 	if (options.deintersect && result.features.length > 1) {
-		for(let i = 0; i < result.features.length - 1; i++) {
-			for(let j = i; j < result.features.length - 1; j++) {
-				const properties = Object.assign({}, result.features[i].properties);
-				result.features[i] = turf.union(result.features[i], result.features[j + 1]);
-				result.features[i].properties = properties;
-			}
-		}
-		for(let i = 0; i < result.features.length - 1; i++) {
-			result.features[i] = turf.difference(result.features[i], result.features[i + 1]);
-		}
+		result.features = deintersectGeoJSONFeatures(result.features);
 	}
 	return result;
 }
@@ -228,16 +234,7 @@ function IsoChrone(origin, options) {
 					const featureCollection = rewind(helpers.featureCollection(polygons));
 					featureCollection.features.reverse();
 					if (options.deintersect && featureCollection.features.length > 1) {
-						for(let i = 0; i < featureCollection.features.length - 1; i++) {
-							for(let j = i; j < featureCollection.features.length - 1; j++) {
-								const properties = Object.assign({}, featureCollection.features[i].properties);
-								featureCollection.features[i] = turf.union(featureCollection.features[i], featureCollection.features[j + 1]);
-								featureCollection.features[i].properties = properties;
-							}
-						}
-						for(let i = 0; i < featureCollection.features.length - 1; i++) {
-							featureCollection.features[i] = turf.difference(featureCollection.features[i], featureCollection.features[i + 1]);
-						}
+						featureCollection.features = deintersectGeoJSONFeatures(featureCollection.features);
 					}
 
 					resolve(featureCollection);
