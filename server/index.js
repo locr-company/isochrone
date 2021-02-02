@@ -175,7 +175,6 @@ app.get('/api/', (req, res) => {
 		intervals: intervals
 	};
 
-	console.log(options);
 	run(options)
 		.then(data => {
 			res.json(data);

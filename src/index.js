@@ -108,7 +108,7 @@ function httpGetJSONPromise(url) {
 
 async function isochroneOSRM(parameters, options) {
 	const coordinates = parameters.coordinates;
-	const coordinatesPerRequest = 10000;
+	const coordinatesPerRequest = 5000;
 	const totalRequests = Math.ceil(coordinates.length / coordinatesPerRequest);
 	const urls = [];
 	for(let i = 0; i < totalRequests; i++) {
