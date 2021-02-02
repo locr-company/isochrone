@@ -84,13 +84,12 @@ Latitude of the origin point.
 
 Longitude of the origin point.
 
-### `-s, --step`
+### `-i, --interval`
 **Required**.
 
-Distance at which to compute isodistance polygons.
-For example, to compute isodistance polygons at 1, 2, 5 and 10 kilometers, use
-`--step 1 --step 2 --step 5 --step 10`
-
+Interval at which to compute isochrone polygons.
+For example, to compute isochrone polygons at 2, 5 and 10 minutes, use
+`--interval 2 --interval 5 --interval 10`
 
 ### `-m, --map`
 **Required**.

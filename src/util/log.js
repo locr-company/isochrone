@@ -1,35 +1,31 @@
 /**
  * log.js
  *
- * @author  Denis Luchkin-Zhou <denis@ricepo.com>
- * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
+ * @author  Ringo Leese <r.leese@locr.com>
+ * @license MIT
  */
-const Log          = require('single-line-log');
-const chalk        = require('chalk');
+const chalk = require('chalk');
+const singleLineLog = require('single-line-log');
 
-const write        = Log(process.stderr);
+const write = singleLineLog(process.stderr);
 
 function log(data) {
 	write(`${chalk.bold.cyan(' .. ')} ${data}`);
 }
 
-module.exports = log;
-
-log.success = function(data) {
+log.success = data => {
 	write(`${chalk.bold.green(' OK ')} ${data}`);
 	// eslint-disable-next-line no-console
 	console.error('');
 };
 
-
-log.warn = function(data) {
+log.warn = data => {
 	write(`${chalk.bold.yellow('WARN')} ${data}`);
 	// eslint-disable-next-line no-console
 	console.error('');
 };
 
-
-log.fail = function(data) {
+log.fail = data => {
 	write(`${chalk.bold.red('FAIL')} ${data}`);
 	// eslint-disable-next-line no-console
 	console.error('');
@@ -37,3 +33,5 @@ log.fail = function(data) {
 	err.known = true;
 	throw err;
 };
+
+module.exports = log;
