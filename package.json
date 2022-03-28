@@ -35,25 +35,25 @@
     "start": "cd server && node index.js"
   },
   "devDependencies": {
-    "eslint": "^7.19.0",
-    "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-import": "^2.22.1",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1"
+    "eslint-plugin-promise": "^5.2.0"
   },
   "dependencies": {
     "@mapbox/polyline": "~1.1.1",
-    "@turf/turf": "~6.2.0",
-    "body-parser": "~1.19.0",
-    "chalk": "~4.1.0",
-    "concaveman": "1.1.1",
+    "@turf/turf": "~6.5.0",
+    "body-parser": "~1.19.2",
+    "chalk": "~5.0.1",
+    "concaveman": "1.2.1",
     "cors": "~2.8.5",
-    "express": "~4.17.1",
+    "express": "~4.17.3",
     "geojson-rewind": "0.3.1",
-    "lodash": "~4.17.20",
+    "lodash": "~4.17.21",
     "osrm": "file:./third_party/osrm-backend",
     "single-line-log": "~1.1.2",
-    "yargs": "~16.2.0"
+    "yargs": "~17.4.0"
   },
   "keywords": []
 }
