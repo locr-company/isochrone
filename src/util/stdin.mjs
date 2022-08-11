@@ -4,7 +4,7 @@
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
  */
-function stdin() {
+export default function stdin() {
 	return new Promise((resolve, reject) => {
 		const stream = process.stdin;
 		const chunks = [];
@@ -26,5 +26,3 @@ function stdin() {
 		stream.on('error', reject);
 	});
 }
-
-module.exports = stdin;

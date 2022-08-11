@@ -8,17 +8,17 @@
  * @example node bin/isochrone.js --lon=8.8071646 --lat=53.0758196 -r 5 -c 0.2 -i 1 -i 3 -i 5 --deintersect -m bremen
  */
 'use strict';
-const _ = require('lodash');
-const Path = require('path');
-const Yargs = require('yargs');
-const { IsoChrone, VALID_PROVIDERS } = require('../src');
-const StdIn = require('../src/util/stdin');
-const log = require('../src/util/log');
+import _ from 'lodash';
+import Path from 'path';
+import Yargs from 'yargs';
+import { IsoChrone, VALID_PROVIDERS } from '../src/index.mjs';
+import StdIn from '../src/util/stdin.mjs';
+import log from '../src/util/log.mjs';
 
 /**
  * Process CLI arguments
  */
-const argv = Yargs
+const argv = Yargs(process.argv)
 	.alias('m', 'map')
 	.describe('map', 'OSRM file to use for routing')
 	.alias('r', 'radius')

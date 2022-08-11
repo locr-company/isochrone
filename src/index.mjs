@@ -7,15 +7,15 @@
  * @license MIT
  */
 
-const http = require('http');
-const https = require('https');
-const bbox = require('@turf/bbox').default;
-const concaveman = require('concaveman');
-const destination = require('@turf/destination').default;
-const helpers = require('@turf/helpers');
-const pointGrid = require('@turf/point-grid').default;
-const rewind = require('geojson-rewind');
-const turf = require('@turf/turf');
+import http from 'http';
+import https from 'https';
+import bbox from '@turf/bbox';
+import concaveman from 'concaveman';
+import destination from '@turf/destination';
+import * as helpers from '@turf/helpers';
+import pointGrid from '@turf/point-grid';
+import rewind from 'geojson-rewind';
+import * as turf from '@turf/turf';
 
 const makeGrid = (startPoint, options) => {
 	const point = helpers.point(startPoint);
@@ -269,4 +269,4 @@ function IsoChrone(origin, options) {
 	});
 }
 
-module.exports = { IsoChrone, VALID_PROVIDERS };
+export { IsoChrone, VALID_PROVIDERS };

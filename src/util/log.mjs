@@ -4,8 +4,8 @@
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
  */
-const chalk = require('chalk');
-const singleLineLog = require('single-line-log');
+import chalk from 'chalk';
+import singleLineLog from 'single-line-log';
 
 const write = singleLineLog(process.stderr);
 
@@ -34,4 +34,4 @@ log.fail = data => {
 	throw err;
 };
 
-module.exports = log;
+export default log;

@@ -8,14 +8,15 @@
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-const _ = require('lodash');
-const BodyParser = require('body-parser');
-const Cors = require('cors');
-const Express = require('express');
-const { IsoChrone, VALID_PROVIDERS } = require('..');
-const Path = require('path');
-const Yargs = require('yargs');
-const log = require('../src/util/log');
+
+import log from '../src/util/log.mjs';
+import _ from 'lodash';
+import BodyParser from 'body-parser';
+import Cors from 'cors';
+import Express from 'express';
+import { IsoChrone, VALID_PROVIDERS } from '../src/index.mjs';
+import Path from 'path';
+import Yargs from 'yargs';
 
 const apiTimeout = 30 * 60 * 1000;
 const defaultPort = 3456;
@@ -24,7 +25,7 @@ let concurrentCalculations = 0;
 /**
  * Process CLI arguments
  */
-const argv = Yargs
+const argv = Yargs(process.argv)
 	.alias('p', 'port')
 	.default('p', defaultPort)
 	.describe('p', 'http-port to listen on.')
@@ -32,10 +33,10 @@ const argv = Yargs
 	.describe('default-provider', 'which provider (' + VALID_PROVIDERS.join(', ') + ') to use as default')
 	.default('osrm-use-node-binding', false)
 	.boolean('osrm-use-node-binding')
-	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/')
-	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/table/v1/)')
-	.default('valhalla-endpoint', 'http://127.0.0.1:8002/isochrone')
-	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/isochrone)')
+	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/') // Devskim: ignore DS137138
+	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/table/v1/)') // Devskim: ignore DS137138
+	.default('valhalla-endpoint', 'http://127.0.0.1:8002/isochrone') // Devskim: ignore DS137138
+	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/isochrone)') // Devskim: ignore DS137138
 	.argv;
 
 function sendBadRequest(message, res) {
