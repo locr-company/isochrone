@@ -17,7 +17,7 @@ Download this repository
 
 ```bash
 git clone git@github.com:locr-company/isochrone.git
-cd isodist
+cd isochrone
 ```
 
 ### 1.2. Build podman image, create and start container
