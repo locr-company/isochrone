@@ -162,7 +162,7 @@ class IsoChroneDemo {
 			map: 'bremen',
 			deintersect: this.Deintersect,
 			provider: this.Provider,
-			intervals: intervals,
+			intervals,
 			radius: this.Radius
 		};
 
@@ -254,7 +254,7 @@ class IsoChroneDemo {
 							switch(geometry.type) {
 								case 'Polygon':
 									leafletCoordinates = reverseLatLongCoordinates(geometry.coordinates);
-									polygon = L.polygon(leafletCoordinates, { color: color });
+									polygon = L.polygon(leafletCoordinates, { color });
 									polygon.addTo(this._map);
 									this._polygons.push(polygon);
 
@@ -266,7 +266,7 @@ class IsoChroneDemo {
 									for(const i in multiCoordinates) {
 										multiCoordinates[i] = reverseLatLongCoordinates(multiCoordinates[i]);
 									}
-									multiPolygon = L.polygon(multiCoordinates, { color: color });
+									multiPolygon = L.polygon(multiCoordinates, { color });
 									multiPolygon.addTo(this._map);
 									this._polygons.push(multiPolygon);
 

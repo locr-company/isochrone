@@ -23,8 +23,8 @@
   "license": "MIT",
   "main": "src/index.js",
   "engines": {
-    "node": ">=12",
-    "npm": ">=6"
+    "node": ">=16",
+    "npm": ">=8"
   },
   "scripts": {
     "clean": "./script/clean.sh",
@@ -35,25 +35,25 @@
     "start": "cd server && node index.mjs"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.4",
+    "eslint": "^8.32.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.2.0"
+    "eslint-plugin-promise": "^6.1.1"
   },
   "dependencies": {
     "@mapbox/polyline": "~1.1.1",
     "@turf/turf": "~6.5.0",
-    "body-parser": "~1.20.0",
-    "chalk": "~5.0.1",
+    "body-parser": "~1.20.1",
+    "chalk": "~5.2.0",
     "concaveman": "1.2.1",
     "cors": "~2.8.5",
-    "express": "~4.18.1",
+    "express": "~4.18.2",
     "geojson-rewind": "0.3.1",
     "lodash": "~4.17.21",
     "osrm": "github:Project-OSRM/osrm-backend#semver:5.27.1",
     "single-line-log": "~1.1.2",
-    "yargs": "~17.5.1"
+    "yargs": "~17.6.2"
   },
   "keywords": []
 }

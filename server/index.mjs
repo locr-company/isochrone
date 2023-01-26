@@ -43,7 +43,7 @@ function sendBadRequest(message, res) {
 	const jsonResult = {
 		code: 400,
 		status: 'Bad Request',
-		message: message
+		message
 	};
 	res.status(400);
 	res.header('Content-Type', 'application/json');
@@ -53,7 +53,7 @@ function sendInternalServerError(message, res) {
 	const jsonResult = {
 		code: 500,
 		status: 'Internal Server Error',
-		message: message
+		message
 	};
 	res.status(400);
 	res.header('Content-Type', 'application/json');
@@ -115,7 +115,7 @@ app.get('/api/', (req, res) => {
 			return;
 		}
 		intervals.push({
-			interval: interval
+			interval
 		});
 	}
 	if (!query.latitude) {
@@ -178,12 +178,12 @@ app.get('/api/', (req, res) => {
 			coordinates: [longitude, latitude]
 		},
 		map: query.map || '',
-		deintersect: deintersect,
-		cellSize: cellSize,
+		deintersect,
+		cellSize,
 		provider: query.provider || 'osrm',
 		profile: query.profile || 'car',
-		radius: radius,
-		intervals: intervals
+		radius,
+		intervals
 	};
 
 	run(options)
@@ -226,7 +226,7 @@ function run(options) {
 		cellSize: 0.1,
 		concavity: 2,
 		deintersect: false,
-		endpoint: endpoint,
+		endpoint,
 		lengthThreshold: 0,
 		map: '',
 		profile: 'car',
