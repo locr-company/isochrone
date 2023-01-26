@@ -16,8 +16,9 @@ export ISOCHRONE_NAME=isochrone # optional (default: isochrone)
 Download this repository
 
 ```bash
-git clone git@github.com:locr-company/isochrone.git
+git clone https://github.com/locr-company/isochrone.git
 cd isochrone
+git submodule update --init --recursive
 ```
 
 ### 1.2. Build podman image, create and start container

@@ -54,3 +54,4 @@ data/valhalla/
 
 *.json
 !package.json
+!package-lock.json
