@@ -213,7 +213,9 @@ app.listen(httpPort, () => {
 
 // Parse the parameter and call isodist
 function run(options) {
-	options.intervals = _.map(options.intervals, 'interval');
+	if (options.intervals instanceof Array) {
+		options.intervals = _.map(options.intervals, 'interval');
+	}
 
 	let endpoint = '';
 	if (options.provider === 'osrm') {
