@@ -30,7 +30,7 @@ const argv = Yargs(process.argv)
 	.default('p', defaultPort)
 	.describe('p', 'http-port to listen on.')
 	.default('default-provider', 'osrm')
-	.describe('default-provider', 'which provider (' + VALID_PROVIDERS.join(', ') + ') to use as default')
+	.describe('default-provider', `which provider (${VALID_PROVIDERS.join(', ')}) to use as default`)
 	.default('osrm-use-node-binding', false)
 	.boolean('osrm-use-node-binding')
 	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/') // Devskim: ignore DS137138
@@ -208,7 +208,7 @@ if (VALID_PROVIDERS.indexOf(argv['default-provider']) === -1) {
 }
 
 app.listen(httpPort, () => {
-	log.success(`Isodist server listening on port ${httpPort}!`);
+	log.success(`IsoChrone server listening on port ${httpPort}!`);
 });
 
 // Parse the parameter and call isodist

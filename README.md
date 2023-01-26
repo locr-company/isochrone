@@ -3,6 +3,47 @@
 This package can compute isochrone polygons based on driving time.  
 This repository is originally forked from https://github.com/locr-company/isodist and is mixed with code from https://github.com/stepankuzmin/node-isochrone
 
+## 1. IsoChrone Service Installation (Ubuntu 22.04)
+
+### 1.1. Prerequisites
+
+If something should differ from the defaults, set the environment variables for the install and update script and add them to `~/.bashrc`!
+
+```bash
+export ISOCHRONE_NAME=isochrone # optional (default: isochrone)
+```
+
+Download this repository
+
+```bash
+git clone git@github.com:locr-company/isochrone.git
+cd isodist
+```
+
+### 1.2. Build podman image, create and start container
+
+```bash
+./script/install_service.sh
+```
+
+### 1.3. Add nginx config
+
+```bash
+sudo cp nginx/isochrone /etc/nginx/conf.d
+```
+
+ensure, that the following line(s) exists in /etc/nginx/sites-enabled/{server-config}
+
+```nginx
+server {
+  ...
+  include conf.d/isochrone;
+  ...
+}
+```
+
+## 2. Old installation description
+
 ## Getting Started
 ```sh
 $ git clone git@github.com:locr-company/isochrone.git
