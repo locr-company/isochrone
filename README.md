@@ -59,8 +59,8 @@ The interval unit is minutes.
 
 ### 2.1. Use the REST-API
 
-Go to http://localhost:3457/ to visit the demo website.
-Go to http://localhost:3457/api-doc/ to visit the API documentation website.
+Go to http://localhost:3457/ to visit the demo website.  
+You can view the API documentation at https://locr-company.github.io/isochrone/ or a local version at http://localhost:3457/api-doc/.
 
 ```bash
 curl "http://localhost:3457/api/?latitude=52.276406&longitude=10.5346&intervals=1,3,5" | jq
