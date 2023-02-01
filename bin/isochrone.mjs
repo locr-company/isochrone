@@ -9,9 +9,8 @@
  */
 'use strict';
 import _ from 'lodash';
-import Path from 'path';
 import Yargs from 'yargs';
-import { IsoChrone, VALID_PROVIDERS } from '../src/index.mjs';
+import { IsoChrone, DEFAULT_PROVIDER, VALID_PROVIDERS } from '../src/index.mjs';
 import StdIn from '../src/util/stdin.mjs';
 import log from '../src/util/log.mjs';
 
@@ -19,8 +18,6 @@ import log from '../src/util/log.mjs';
  * Process CLI arguments
  */
 const argv = Yargs(process.argv)
-	.alias('m', 'map')
-	.describe('map', 'OSRM file to use for routing')
 	.alias('r', 'radius')
 	.default('r', 5)
 	.describe('r', 'distance to draw the buffer')
@@ -28,15 +25,16 @@ const argv = Yargs(process.argv)
 	.default('c', 0.1)
 	.describe('c', 'the distance across each cell')
 	.alias('i', 'interval')
-	.describe('interval', 'intervals for isochrones in minutes')
+	.number('i')
+	.describe('i', 'intervals for isochrones in minutes')
 	.alias('p', 'profile')
 	.default('p', 'car')
 	.describe('p', 'Routing profile to use (car, motorbike, pedestrian...)')
 	.alias('u', 'units')
-	.default('units', 'kilometers')
-	.describe('units', 'any of the options supported by turf units')
-	.default('provider', 'osrm')
-	.describe('provider', 'Routing provider (osrm, valhalla)')
+	.describe('u', 'any of the options supported by turf units')
+	.default('u', 'kilometers')
+	.default('provider', DEFAULT_PROVIDER)
+	.describe('provider', 'Routing provider (valhalla, osrm)')
 	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/table/v1/)')
 	.default('concavity', 2)
 	.describe('concavity', 'relative measure of concavity')
@@ -59,7 +57,7 @@ StdIn()
 		/**
 		 * Generate the origin point if not specified
 		 */
-		if (!options.origin && (!_.isFinite(argv.lat) || !_.isFinite(argv.lon))) {
+		if (!options.origin && (!(_.isFinite(argv.lat) && _.isFinite(argv.lon)))) {
 			log.fail('Could not determine origin location');
 		}
 		if (argv.lat && argv.lon) {
@@ -75,20 +73,32 @@ StdIn()
 		if (argv.interval) {
 			options.intervals = [].concat(argv.interval);
 		}
-		if (!options.intervals || !options.intervals.length) {
+		if (!(options.intervals?.length)) {
 			log.fail('Could not determine isodistance intervals');
+		}
+
+		const provider = argv.provider || DEFAULT_PROVIDER;
+		let endpoint = argv.endpoint;
+		if (!endpoint) {
+			switch(provider) {
+				case 'osrm':
+					endpoint = 'http://127.0.0.1:5000/table/v1/';
+					break;
+				case 'valhalla':
+					endpoint = 'http://127.0.0.1:8002/isochrone';
+					break;
+			}
 		}
 
 		/**
 		 * Copy over -h, -r and -m
 		 */
 		options = _.defaults(options, {
-			deintersect: argv.deintersect || false,
-			endpoint: argv.endpoint,
+			deintersect: argv.deintersect,
+			endpoint,
 			cellSize: argv.c,
-			map: argv.m,
 			profile: argv.profile || 'car',
-			provider: argv.provider || 'osrm',
+			provider,
 			radius: argv.r,
 			concavity: argv.concavity,
 			lengthThreshold: argv['length-threshold'],
@@ -97,33 +107,6 @@ StdIn()
 
 		if (VALID_PROVIDERS.indexOf(options.provider) === -1) {
 			log.fail(`Invalid provider (${options.provider})`);
-		}
-
-		switch(options.provider) {
-			case 'osrm':
-				if (options.endpoint) {
-					if (options.map) {
-						log.fail('Ambigious parameters where given (--endpoint and --map). Please only use 1 of them!');
-					}
-				} else {
-					if (!options.map) {
-						log.fail('Missing OSRM map name, if no endpoint is given');
-					}
-
-					/**
-					 * Resolve the options path
-					 */
-					const mapName = Path.resolve(__dirname, `../data/osrm/${options.map}.osrm`);
-					const OSRM = require('osrm');
-					options.osrm = new OSRM(mapName);
-				}
-				break;
-
-			case 'valhalla':
-				if (!options.endpoint) {
-					log.fail('Missing endpoint for provider: valhalla');
-				}
-				break;
 		}
 
 		/**

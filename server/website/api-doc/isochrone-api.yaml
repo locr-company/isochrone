@@ -1,0 +1,228 @@
+openapi: 3.0.0
+servers:
+  - description: IsoChrone Demo Server
+    url: 'http://localhost:3457/api'
+info:
+  description: An API for IsoChrone mapping
+  version: 1.0.0
+  title: IsoChrone API
+  contact:
+    email: r.leese@locr.com
+    name: Ringo Leese
+paths:
+  /:
+    get:
+      summary: Calculate IsoChrone data
+      operationId: calcIsoChroneGet
+      parameters:
+        - $ref: '#/components/parameters/cellSizeParam'
+        - $ref: '#/components/parameters/deintersectParam'
+        - $ref: '#/components/parameters/intervalsParam'
+        - $ref: '#/components/parameters/latitudeParam'
+        - $ref: '#/components/parameters/longitudeParam'
+        - $ref: '#/components/parameters/profileParam'
+        - $ref: '#/components/parameters/providerParam'
+        - $ref: '#/components/parameters/radiusParam'
+      responses:
+        200:
+          description: successfully calculated the IsoChrone data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeoJsonResult'
+        400:
+          description: if a parameter is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResult'
+    post:
+      summary: Calculate IsoChrone data
+      operationId: calcIsoChronePost
+      requestBody:
+        description: JSON object with parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cellSize:
+                  $ref: '#/components/parameters/cellSizeParam'
+                deintersect:
+                  $ref: '#/components/parameters/deintersectParam'
+                intervals:
+                  $ref: '#/components/parameters/intervalsArrayParam'
+                origin:
+                  $ref: '#/components/parameters/originParam'
+                profile:
+                  $ref: '#/components/parameters/profileParam'
+                provider:
+                  $ref: '#/components/parameters/providerParam'
+                radius:
+                  $ref: '#/components/parameters/radiusParam'
+      responses:
+        200:
+          description: successfully calculated the IsoChrone data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeoJsonResult'
+        400:
+          description: if a parameter is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResult'
+components:
+  parameters:
+    cellSizeParam:
+      name: cell_size
+      in: query
+      description: The cell-size or granularity of the grid to request (default 0.1). Default unit is km.
+      schema:
+        type: number
+      example: 0.1
+    deintersectParam:
+      name: deintersect
+      in: query
+      description: Deintersect the polygons. If set, the polygons are mutually exclusive
+      schema:
+        type: boolean
+      example: true
+    intervalsParam:
+      name: intervals
+      in: query
+      description: Interval values, separated by "," and in minutes.
+      required: true
+      type: array
+      items:
+        type: number
+      example: 1,2,3
+    intervalsArrayParam:
+      name: intervals
+      in: query
+      description: Interval values in minutes.
+      required: true
+      type: array
+      items:
+        type: object
+      example: [{interval: 1}, {interval: 2}, {interval: 3}]
+    latitudeParam:
+      name: latitude
+      in: query
+      description: A latitude value from -90.0 and 90.0.
+      required: true
+      schema:
+        type: number
+      example: 52.276406
+    longitudeParam:
+      name: longitude
+      in: query
+      description: A longitude value from -180.0 and 180.0.
+      required: true
+      schema:
+        type: number
+      example: 10.5346
+    originParam:
+      name: origin
+      description: The Origin as geojson formatted string
+      required: true
+      schema:
+        type: object
+      example: {type: 'Point', coordinates: [10.5346, 52.276406]}
+    profileParam:
+      name: profile
+      in: query
+      description: 'The routing profile to use, if available (e.g.: car, motorcycle, bike, pedestrian)'
+      schema:
+        type: string
+      example: car
+    providerParam:
+      name: provider
+      in: query
+      description: The provider to use for calculating the IsoChrone data.
+      enum:
+        - osrm
+        - valhalla
+      example: valhalla
+    radiusParam:
+      name: radius
+      in: query
+      description: The maximum radius in km for the algorithm to lookup. Default is -1 (automatic).
+      type: number
+      example: 5
+  schemas:
+    BadRequestResult:
+      type: object
+      properties:
+        code:
+          type: number
+          example: 400
+        status:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Invalid "latitude" value => foo
+    GeoJsonFeature:
+      type: object
+      properties:
+        properties:
+          $ref: '#/components/schemas/GeoJsonProperty'
+        geometry:
+          $ref: '#/components/schemas/GeoJsonGeometry'
+        type:
+          type: string
+          example: Feature
+    GeoJsonGeometry:
+      type: object
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: number
+            example: [[10.5406, 52.295458], [10.540164, 52.293842], [10.538924, 52.293406]]
+        type:
+          type: string
+          example: Polygon
+    GeoJsonProperty:
+      type: object
+      properties:
+        fill:
+          type: string
+          example: '#ff7300'
+        fillOpacity:
+          type: number
+          example: 0.33
+        fill-opacity:
+          type: number
+          example: 0.33
+        fillColor:
+          type: string
+          example: '#ff7300'
+        color:
+          type: string
+          example: '#ff7300'
+        contour:
+          type: number
+          example: 3
+        opacity:
+          type: number
+          example: 0.33
+        metric:
+          type: string
+          example: time
+    GeoJsonResult:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoJsonFeature'
+        type:
+          type: string
+          example: "FeatureCollection"

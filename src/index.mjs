@@ -61,6 +61,7 @@ const makePolygons = (pointsByInterval, options) => {
 };
 
 const VALID_PROVIDERS = ['osrm', 'valhalla'];
+const DEFAULT_PROVIDER = 'valhalla';
 
 function httpGetJSONPromise(url) {
 	return new Promise((resolve, reject) => {
@@ -269,4 +270,4 @@ function IsoChrone(origin, options) {
 	});
 }
 
-export { IsoChrone, VALID_PROVIDERS };
+export { IsoChrone, DEFAULT_PROVIDER, VALID_PROVIDERS };

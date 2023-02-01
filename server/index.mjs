@@ -14,13 +14,14 @@ import _ from 'lodash';
 import BodyParser from 'body-parser';
 import Cors from 'cors';
 import Express from 'express';
-import { IsoChrone, VALID_PROVIDERS } from '../src/index.mjs';
-import Path from 'path';
+import { IsoChrone, DEFAULT_PROVIDER, VALID_PROVIDERS } from '../src/index.mjs';
 import Yargs from 'yargs';
+import os from 'os';
 
-const apiTimeout = 30 * 60 * 1000;
-const defaultPort = 3456;
-let concurrentCalculations = 0;
+const apiTimeout = 30 * 60 * 1000; // 30 minutes
+const defaultPort = 3457;
+let runningTasks = 0;
+let totalTasks = 0;
 
 /**
  * Process CLI arguments
@@ -29,10 +30,8 @@ const argv = Yargs(process.argv)
 	.alias('p', 'port')
 	.default('p', defaultPort)
 	.describe('p', 'http-port to listen on.')
-	.default('default-provider', 'osrm')
+	.default('default-provider', DEFAULT_PROVIDER)
 	.describe('default-provider', `which provider (${VALID_PROVIDERS.join(', ')}) to use as default`)
-	.default('osrm-use-node-binding', false)
-	.boolean('osrm-use-node-binding')
 	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/') // Devskim: ignore DS137138
 	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/table/v1/)') // Devskim: ignore DS137138
 	.default('valhalla-endpoint', 'http://127.0.0.1:8002/isochrone') // Devskim: ignore DS137138
@@ -49,7 +48,13 @@ function sendBadRequest(message, res) {
 	res.header('Content-Type', 'application/json');
 	res.json(jsonResult);
 }
-function sendInternalServerError(message, res) {
+function sendInternalServerError(err, res) {
+	let message = '';
+	if (err instanceof Error) {
+		message = err.message;
+	} else {
+		message = err;
+	}
 	const jsonResult = {
 		code: 500,
 		status: 'Internal Server Error',
@@ -65,7 +70,7 @@ app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
 
-app.get('/api/providers/list', (req, res) => {
+app.get('/api/providers/list', (_req, res) => {
 	const json = {
 		providers: VALID_PROVIDERS,
 		default: argv['default-provider']
@@ -73,15 +78,14 @@ app.get('/api/providers/list', (req, res) => {
 	res.setHeader('Content-Type', 'application/json');
 	res.end(JSON.stringify(json));
 });
-app.get('/api/status.json', (req, res) => {
+app.get('/api/status', (req, res) => {
 	const json = {
-		server: {
-			type: 'nodejs',
-			platform: process.platform,
-			version: process.version
+		machine: {
+			'load-average': os.loadavg()
 		},
-		processes: {
-			count: concurrentCalculations
+		service: {
+			'running-tasks': runningTasks,
+			'total-tasks': totalTasks
 		}
 	};
 	res.setHeader('Content-Type', 'application/json');
@@ -90,15 +94,14 @@ app.get('/api/status.json', (req, res) => {
 app.post('/api/', (req, res) => {
 	req.setTimeout(apiTimeout);
 	run(req.body)
-		.then((data) => {
-			res.json(data);
-		})
+		.then((data) => res.json(data))
 		.catch((err) => {
 			log.warn(err);
 			sendInternalServerError(err, res);
 		});
 });
 app.get('/api/', (req, res) => {
+	req.setTimeout(apiTimeout);
 	const query = req.query;
 	const intervals = [];
 	if (!query.intervals) {
@@ -161,12 +164,13 @@ app.get('/api/', (req, res) => {
 		}
 	}
 	let deintersect = false;
-	if (query.deintersect) {
+	if (typeof query.deintersect === 'string') {
 		switch(query.deintersect) {
 			case '1':
 			case 'true':
 			case 'yes':
 			case 'on':
+			case '':
 				deintersect = true;
 				break;
 		}
@@ -177,28 +181,19 @@ app.get('/api/', (req, res) => {
 			type: 'Point',
 			coordinates: [longitude, latitude]
 		},
-		map: query.map || '',
 		deintersect,
 		cellSize,
-		provider: query.provider || 'osrm',
+		provider: query.provider || DEFAULT_PROVIDER,
 		profile: query.profile || 'car',
 		radius,
 		intervals
 	};
 
 	run(options)
-		.then(data => {
-			res.json(data);
-		})
+		.then(data => res.json(data))
 		.catch(err => {
 			log.warn(err);
-			let errorMessage = '';
-			if (err instanceof Error) {
-				errorMessage = err.message;
-			} else {
-				errorMessage = err;
-			}
-			sendInternalServerError(errorMessage, res);
+			sendInternalServerError(err, res);
 		});
 });
 
@@ -230,9 +225,8 @@ function run(options) {
 		deintersect: false,
 		endpoint,
 		lengthThreshold: 0,
-		map: '',
 		profile: 'car',
-		provider: 'osrm',
+		provider: DEFAULT_PROVIDER,
 		radius: -1,
 		unit: 'kilometers'
 	});
@@ -247,32 +241,11 @@ function run(options) {
 		throw new Error(`Invalid provider (${options.provider})`);
 	}
 
-	switch(options.provider) {
-		case 'osrm':
-			if (argv['osrm-use-node-binding']) {
-				if (!options.map) {
-					log.fail('Missing OSRM map name, if no endpoint is given');
-				}
-				/**
-				 * Resolve the options path
-				 */
-				const mapName = Path.resolve(__dirname, `../data/osrm/${options.map}.osrm`);
-				const OSRM = require('osrm');
-				options.osrm = new OSRM(mapName);
-			}
-			break;
-
-		case 'valhalla':
-			if (!options.endpoint) {
-				log.fail('Missing endpoint for provider: valhalla');
-			}
-			break;
-	}
-
 	try {
-		concurrentCalculations++;
+		runningTasks++;
+		totalTasks++;
 		return IsoChrone(options.origin, options);
 	} finally {
-		concurrentCalculations--;
+		runningTasks--;
 	}
 }

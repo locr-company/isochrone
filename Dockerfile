@@ -1,22 +1,27 @@
-FROM ubuntu:22.04
+ARG environment
 
-RUN apt update && \
-    apt upgrade -y && \
-    apt install -y curl git
+FROM ubuntu:22.04 AS base
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y curl git jq
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt install -y nodejs
+RUN apt-get install -y nodejs
+RUN npm install -g npm
 
+FROM base AS version-for-dev
+
+FROM base AS version-for-prod
 RUN mkdir -p /app
 COPY ./package.json /app
 COPY ./package-lock.json /app
 COPY ./server /app/server
 COPY ./src /app/src
+RUN cd /app && npm install
+
+FROM version-for-${environment} AS final
 
 WORKDIR /app
 
-#RUN npm set unsafe-perm true
-RUN npm install -g npm
-RUN npm install
-
-CMD [ "/usr/bin/node", "server/index.mjs", "--port=3457" ]
+CMD [ "/usr/bin/npm", "start" ]

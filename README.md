@@ -18,16 +18,25 @@ Download this repository
 ```bash
 git clone https://github.com/locr-company/isochrone.git
 cd isochrone
-git submodule update --init --recursive
 ```
 
 ### 1.2. Build podman image, create and start container
+
+#### 1.2.1. For producation systems
 
 ```bash
 ./script/install_service.sh
 ```
 
-### 1.3. Add nginx config
+#### 1.2.1. For developments systems
+
+```bash
+podman build --tag=isochrone-dev --build-arg environment=dev .
+podman run --rm -it -v ${PWD}:/app --network=host --name=isochrone-dev isochrone-dev /bin/bash
+npm start
+```
+
+### 1.3. Add nginx config (optional)
 
 ```bash
 sudo cp nginx/isochrone /etc/nginx/conf.d
@@ -43,56 +52,40 @@ server {
 }
 ```
 
-## 2. Old installation description
+## 2. Using the API
 
-## Getting Started
-```sh
-$ git clone git@github.com:locr-company/isochrone.git
-$ cd isochrone
-$ git submodule update --init --recursive
-$ npm install
+The default provider is "valhalla" on endpoint: "http://127.0.0.1:8002/isochrone".  
+The interval unit is minutes.  
+
+### 2.1. Use the REST-API
+
+Go to http://localhost:3457/ to visit the demo website.
+Go to http://localhost:3457/api-doc/ to visit the API documentation website.
+
+```bash
+curl "http://localhost:3457/api/?latitude=52.276406&longitude=10.5346&intervals=1,3,5" | jq
 ```
 
-## setup and prepare osrm
-```sh
-sudo apt install cmake g++ libtbb2 libtbb-dev libexpat1 libexpat1-dev bzip2 libbz2-1.0 libbz2-dev lua5.3 libluabind-dev liblua5.3-0 liblua5.3-dev libluajit-5.1-dev luajit zlib1g zlib1g-dev libboost-all-dev
+### 2.2. Use the CLI-API
 
-npm run setup-osrm
-npm run prepare-osrm
+```bash
+./bin/isochrone.mjs --lon=10.5346 --lat=52.276406 -i 1 -i 3 -i 5 | jq
 ```
 
-## setup and prepare valhalla
-```sh
-sudo apt install libsqlite3-mod-spatialite autoconf automake libzmq5 libzmq3-dev libczmq4 libczmq-dev curl libcurl4 libcurl4-openssl-dev libprotobuf-dev libgeos-dev libgeos++-dev protobuf-compiler spatialite-bin libsqlite3-dev libspatialite-dev libsqlite3-mod-spatialite lcov unzip
-
-npm run setup-valhalla
-npm run prepare-valhalla
-```
-
-In order to run `isochrone`, you will need to download an `*.osm` file corresponding to the region
-where you want to do your computation. [Geofabrik][1] is a good source of these files.
-
-You need to place your OSM files into the `isochrone/data` directory (create one if it does not exist).
-Then run the following command to generate `.osrm` files:
-
-Finally, you are good to go! In order to generate the graph above, you will need `bremen.osrm` and
-run the following:
-```sh
-$ bin/isochrone.js --lon=-86.893386 --lat=40.417202 -i 2 -i 5 -i 7 -m bremen
-```
+## 3. Deprecated (not complete) usage description
 
 ## Input file
+
 You can specify all the parameters in an input file that is piped into standard input:
 ```json
 /* input.json */
 {
 	"origin": {
 		"type": "Point",
-		"coordinates": [ 8.8071646, 53.0758196 ]
+		"coordinates": [ 10.5346, 52.276406 ]
 	},
-	"map": "bremen",
 	"deintersect": true,
-	"provider": "osrm",
+	"provider": "valhalla",
 	"intervals": [{
 		"interval": 1
 	}, {
@@ -110,7 +103,6 @@ $ bin/isochrone.js < input.json
 Please note that CLI arguments always override values specified in the input file.
 ```sh
 $ bin/isochrone.js --map il < input.json
-# The above command will use `data/osrm/il.osrm`
 ```
 
 
@@ -132,11 +124,6 @@ Longitude of the origin point.
 Interval at which to compute isochrone polygons.
 For example, to compute isochrone polygons at 2, 5 and 10 minutes, use
 `--interval 2 --interval 5 --interval 10`
-
-### `-m, --map`
-**Required**.
-
-Name of the `.osrm` file you wish to use for routing.
 
 
 [0]: media/isochrone.png

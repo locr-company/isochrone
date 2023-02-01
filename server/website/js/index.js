@@ -159,7 +159,6 @@ class IsoChroneDemo {
 				type: 'Point',
 				coordinates: [center.lng, center.lat]
 			},
-			map: 'bremen',
 			deintersect: this.Deintersect,
 			provider: this.Provider,
 			intervals,

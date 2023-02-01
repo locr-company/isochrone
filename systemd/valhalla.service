@@ -1,9 +1,0 @@
-[Unit]
-Description=Valhalla
-
-[Service]
-TimeoutStartSec=0
-Type=simple
-WorkingDirectory=/isodist/data/valhalla
-ExecStart=/isodist/third_party/valhalla/build/valhalla_service valhalla.json 1
-Restart=always

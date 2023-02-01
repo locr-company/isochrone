@@ -1,9 +1,0 @@
-[Unit]
-Description=OSRM
-
-[Service]
-TimeoutStartSec=0
-Type=simple
-WorkingDirectory=/isodist/data/osrm
-ExecStart=/isodist/third_party/osrm-backend/build/osrm-routed bremen.osrm
-Restart=always

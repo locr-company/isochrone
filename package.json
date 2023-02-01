@@ -15,23 +15,18 @@
     "url": "https://github.com/locr-company/isochrone/issues"
   },
   "bin": {
-    "isochrone": "bin/isochrone.js"
+    "isochrone": "bin/isochrone.mjs"
   },
   "files": [
     "src"
   ],
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "src/index.mjs",
   "engines": {
     "node": ">=16",
     "npm": ">=8"
   },
   "scripts": {
-    "clean": "./script/clean.sh",
-    "setup-osrm": "./script/setup-osrm.sh",
-    "setup-valhalla": "./script/setup-valhalla.sh",
-    "prepare-osrm": "./script/prepare-osrm.sh",
-    "prepare-valhalla": "./script/prepare-valhalla.sh",
     "start": "cd server && node index.mjs"
   },
   "devDependencies": {
@@ -51,7 +46,6 @@
     "express": "~4.18.2",
     "geojson-rewind": "0.3.1",
     "lodash": "~4.17.21",
-    "osrm": "github:Project-OSRM/osrm-backend#semver:5.27.1",
     "single-line-log": "~1.1.2",
     "yargs": "~17.6.2"
   },
