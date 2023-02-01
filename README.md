@@ -68,15 +68,16 @@ curl "http://localhost:3457/api/?latitude=52.276406&longitude=10.5346&intervals=
 
 ### 2.2. Use the CLI-API
 
+Via parameters
+
 ```bash
 ./bin/isochrone.mjs --lon=10.5346 --lat=52.276406 -i 1 -i 3 -i 5 | jq
 ```
 
-## 3. Deprecated (not complete) usage description
-
-## Input file
+Via input.json file
 
 You can specify all the parameters in an input file that is piped into standard input:
+
 ```json
 /* input.json */
 {
@@ -94,15 +95,10 @@ You can specify all the parameters in an input file that is piped into standard 
 		"interval": 5
 	}]
 }
-
-```
-```sh
-$ bin/isochrone.js < input.json
 ```
 
-Please note that CLI arguments always override values specified in the input file.
-```sh
-$ bin/isochrone.js --map il < input.json
+```bash
+$ ./bin/isochrone.mjs < input.json
 ```
 
 
