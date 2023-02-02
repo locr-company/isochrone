@@ -20,6 +20,8 @@ git clone https://github.com/locr-company/isochrone.git
 cd isochrone
 ```
 
+Download and install [Valhalla](https://github.com/valhalla/valhalla) or [OSRM](https://github.com/Project-OSRM/osrm-backend) to use the appropriate provider!
+
 ### 1.2. Build podman image, create and start container
 
 #### 1.2.1. For producation systems
@@ -28,11 +30,12 @@ cd isochrone
 ./script/install_service.sh
 ```
 
-#### 1.2.1. For developments systems
+#### 1.2.2. For developments systems
 
 ```bash
 podman build --tag=isochrone-dev --build-arg environment=dev .
 podman run --rm -it -v ${PWD}:/app --network=host --name=isochrone-dev isochrone-dev /bin/bash
+npm install
 npm start
 ```
 

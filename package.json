@@ -1,7 +1,7 @@
 {
   "name": "isochrone",
   "description": "Compute isochrone polygons",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "homepage": "https://github.com/locr-company/isochrone",
   "author": {
     "name": "Ringo Leese",
@@ -29,13 +29,6 @@
   "scripts": {
     "start": "cd server && node index.mjs"
   },
-  "devDependencies": {
-    "eslint": "^8.33.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1"
-  },
   "dependencies": {
     "@mapbox/polyline": "~1.1.1",
     "@turf/turf": "~6.5.0",
@@ -48,6 +41,13 @@
     "lodash": "~4.17.21",
     "single-line-log": "~1.1.2",
     "yargs": "~17.6.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.33.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1"
   },
   "keywords": []
 }

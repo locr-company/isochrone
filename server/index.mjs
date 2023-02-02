@@ -49,6 +49,8 @@ function sendBadRequest(message, res) {
 	res.json(jsonResult);
 }
 function sendInternalServerError(err, res) {
+	log.warn(err);
+
 	let message = '';
 	if (err instanceof Error) {
 		message = err.message;
@@ -60,7 +62,7 @@ function sendInternalServerError(err, res) {
 		status: 'Internal Server Error',
 		message
 	};
-	res.status(400);
+	res.status(500);
 	res.header('Content-Type', 'application/json');
 	res.json(jsonResult);
 }
@@ -94,11 +96,8 @@ app.get('/api/status', (req, res) => {
 app.post('/api/', (req, res) => {
 	req.setTimeout(apiTimeout);
 	run(req.body)
-		.then((data) => res.json(data))
-		.catch((err) => {
-			log.warn(err);
-			sendInternalServerError(err, res);
-		});
+		.then(data => res.json(data))
+		.catch(err => sendInternalServerError(err, res));
 });
 app.get('/api/', (req, res) => {
 	req.setTimeout(apiTimeout);
@@ -191,10 +190,7 @@ app.get('/api/', (req, res) => {
 
 	run(options)
 		.then(data => res.json(data))
-		.catch(err => {
-			log.warn(err);
-			sendInternalServerError(err, res);
-		});
+		.catch(err => sendInternalServerError(err, res));
 });
 
 const httpPort = (argv.p || process.env.PORT) || defaultPort;
