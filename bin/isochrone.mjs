@@ -35,7 +35,6 @@ const argv = Yargs(process.argv)
 	.default('u', 'kilometers')
 	.default('provider', DEFAULT_PROVIDER)
 	.describe('provider', 'Routing provider (valhalla, osrm)')
-	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/table/v1/)')
 	.default('concavity', 2)
 	.describe('concavity', 'relative measure of concavity')
 	.default('length-threshold', 0)
@@ -78,24 +77,12 @@ StdIn()
 		}
 
 		const provider = argv.provider || DEFAULT_PROVIDER;
-		let endpoint = argv.endpoint;
-		if (!endpoint) {
-			switch(provider) {
-				case 'osrm':
-					endpoint = 'http://127.0.0.1:5000/table/v1/';
-					break;
-				case 'valhalla':
-					endpoint = 'http://127.0.0.1:8002/isochrone';
-					break;
-			}
-		}
 
 		/**
 		 * Copy over -h, -r and -m
 		 */
 		options = _.defaults(options, {
 			deintersect: argv.deintersect,
-			endpoint,
 			cellSize: argv.c,
 			profile: argv.profile || 'car',
 			provider,

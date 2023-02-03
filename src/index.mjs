@@ -8,7 +8,6 @@
  */
 
 import http from 'http';
-import https from 'https';
 import bbox from '@turf/bbox';
 import concaveman from 'concaveman';
 import destination from '@turf/destination';
@@ -99,11 +98,7 @@ function httpGetJSONPromise(url) {
 			});
 		};
 
-		if (url.indexOf('https') === 0) {
-			https.get(url, restCallback).on('error', reject);
-		} else {
-			http.get(url, restCallback).on('error', reject);
-		}
+		http.get(url, restCallback).on('error', reject);
 	});
 }
 
@@ -113,7 +108,8 @@ async function isochroneOSRM(parameters, options) {
 	const totalRequests = Math.ceil(coordinates.length / coordinatesPerRequest);
 	const urls = [];
 	for(let i = 0; i < totalRequests; i++) {
-		let url = `${options.endpoint}${options.profile}/${coordinates[0][0]},${coordinates[0][1]}`;
+		// Devskim: ignore DS137138
+		let url = `http://127.0.0.1:5000/table/v1/${options.profile}/${coordinates[0][0]},${coordinates[0][1]}`;
 		let coordinateCounter = 0;
 		const firstRequestOffset = (i === 0) ? 1 : 0;
 		for(let j = i * coordinatesPerRequest + firstRequestOffset; j < i * coordinatesPerRequest + coordinatesPerRequest; j++) {
@@ -198,7 +194,8 @@ async function isochroneValhalla(startPoint, options) {
 			json.contours.push({ time: interval });
 		}
 	}
-	const url = `${options.endpoint}?json=${JSON.stringify(json)}`;
+	// Devskim: ignore DS137138
+	const url = `http://127.0.0.1:8002/isochrone?json=${JSON.stringify(json)}`;
 	const result = await httpGetJSONPromise(url);
 	if (options.deintersect && result.features.length > 1) {
 		result.features = deintersectGeoJSONFeatures(result.features);

@@ -30,12 +30,6 @@ const argv = Yargs(process.argv)
 	.alias('p', 'port')
 	.default('p', defaultPort)
 	.describe('p', 'http-port to listen on.')
-	.default('default-provider', DEFAULT_PROVIDER)
-	.describe('default-provider', `which provider (${VALID_PROVIDERS.join(', ')}) to use as default`)
-	.default('osrm-endpoint', 'http://127.0.0.1:5000/table/v1/') // Devskim: ignore DS137138
-	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/table/v1/)') // Devskim: ignore DS137138
-	.default('valhalla-endpoint', 'http://127.0.0.1:8002/isochrone') // Devskim: ignore DS137138
-	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/isochrone)') // Devskim: ignore DS137138
 	.argv;
 
 function sendBadRequest(message, res) {
@@ -75,7 +69,7 @@ app.use(Express.static('website'));
 app.get('/api/providers/list', (_req, res) => {
 	const json = {
 		providers: VALID_PROVIDERS,
-		default: argv['default-provider']
+		default: DEFAULT_PROVIDER
 	};
 	res.setHeader('Content-Type', 'application/json');
 	res.end(JSON.stringify(json));
@@ -194,9 +188,6 @@ app.get('/api/', (req, res) => {
 });
 
 const httpPort = (argv.p || process.env.PORT) || defaultPort;
-if (VALID_PROVIDERS.indexOf(argv['default-provider']) === -1) {
-	log.fail(`invalid provider => ${argv['default-provider']}. Valid values are (${VALID_PROVIDERS.join(', ')}).`);
-}
 
 app.listen(httpPort, () => {
 	log.success(`IsoChrone server listening on port ${httpPort}!`);
@@ -208,18 +199,10 @@ async function run(options) {
 		options.intervals = _.map(options.intervals, 'interval');
 	}
 
-	let endpoint = '';
-	if (options.provider === 'osrm') {
-		endpoint = argv['osrm-endpoint'];
-	} else if (options.provider === 'valhalla') {
-		endpoint = argv['valhalla-endpoint'];
-	}
-
 	options = _.defaults(options, {
 		cellSize: 0.1,
 		concavity: 2,
 		deintersect: false,
-		endpoint,
 		lengthThreshold: 0,
 		profile: 'car',
 		provider: DEFAULT_PROVIDER,
