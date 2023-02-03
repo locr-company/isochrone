@@ -24,13 +24,13 @@ Download and install [Valhalla](https://github.com/valhalla/valhalla) or [OSRM](
 
 ### 1.2. Build podman image, create and start container
 
-#### 1.2.1. For producation systems
+#### 1.2.1. For production systems
 
 ```bash
 ./script/install_service.sh
 ```
 
-#### 1.2.2. For developments systems
+#### 1.2.2. For development systems
 
 ```bash
 podman build --tag=isochrone-dev --build-arg environment=dev .
