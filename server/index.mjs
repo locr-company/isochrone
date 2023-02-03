@@ -203,7 +203,7 @@ app.listen(httpPort, () => {
 });
 
 // Parse the parameter and call isodist
-function run(options) {
+async function run(options) {
 	if (options.intervals instanceof Array) {
 		options.intervals = _.map(options.intervals, 'interval');
 	}
@@ -240,7 +240,7 @@ function run(options) {
 	try {
 		runningTasks++;
 		totalTasks++;
-		return IsoChrone(options.origin, options);
+		return await IsoChrone(options.origin, options);
 	} finally {
 		runningTasks--;
 	}
