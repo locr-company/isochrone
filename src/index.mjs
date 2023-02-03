@@ -103,13 +103,19 @@ function httpGetJSONPromise(url) {
 }
 
 async function isochroneOSRM(parameters, options) {
+	const profile = options.profile;
+	const profiles = ['car', 'bicycle', 'foot'];
+	if (profiles.indexOf(profile) === -1) {
+		throw new Error(`Invalid profile: ${profile}`);
+	}
+
 	const coordinates = parameters.coordinates;
 	const coordinatesPerRequest = 5000;
 	const totalRequests = Math.ceil(coordinates.length / coordinatesPerRequest);
 	const urls = [];
 	for(let i = 0; i < totalRequests; i++) {
 		// Devskim: ignore DS137138
-		let url = `http://127.0.0.1:5000/table/v1/${options.profile}/${coordinates[0][0]},${coordinates[0][1]}`;
+		let url = `http://127.0.0.1:5000/table/v1/${profile}/${coordinates[0][0]},${coordinates[0][1]}`;
 		let coordinateCounter = 0;
 		const firstRequestOffset = (i === 0) ? 1 : 0;
 		for(let j = i * coordinatesPerRequest + firstRequestOffset; j < i * coordinatesPerRequest + coordinatesPerRequest; j++) {

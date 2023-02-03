@@ -210,11 +210,6 @@ async function run(options) {
 		unit: 'kilometers'
 	});
 
-	const profiles = ['car', 'bicycle', 'foot'];
-	if (profiles.indexOf(options.profile) === -1) {
-		throw new Error(`Invalid profile: ${options.profile}`);
-	}
-
 	if (options.radius <= 0) {
 		const maxMinutes = Math.max(...options.intervals);
 		// 120km/h / 60mins * maxMinutes
