@@ -249,13 +249,9 @@ function IsoChrone(origin, options) {
 			switch(options.provider) {
 				case 'osrm':
 					coordinates = [startPoint].concat(makeGrid(startPoint, options));
-					if (options.osrm) {
-						options.osrm.table({ sources: [0], coordinates }, osrmTableResultCallback);
-					} else {
-						isochroneOSRM({ sources: [0], coordinates }, options)
-							.then(result => osrmTableResultCallback(null, result))
-							.catch(reject);
-					}
+					isochroneOSRM({ sources: [0], coordinates }, options)
+						.then(result => osrmTableResultCallback(null, result))
+						.catch(reject);
 					break;
 
 				case 'valhalla':
