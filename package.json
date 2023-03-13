@@ -37,7 +37,6 @@
     "concaveman": "1.2.1",
     "cors": "~2.8.5",
     "express": "~4.18.2",
-    "geojson-rewind": "0.3.1",
     "lodash": "~4.17.21",
     "single-line-log": "~1.1.2",
     "yargs": "~17.7.1"

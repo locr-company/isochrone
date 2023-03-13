@@ -13,7 +13,7 @@ import concaveman from 'concaveman';
 import destination from '@turf/destination';
 import * as helpers from '@turf/helpers';
 import pointGrid from '@turf/point-grid';
-import rewind from 'geojson-rewind';
+import rewind from '@turf/rewind';
 import * as turf from '@turf/turf';
 
 const makeGrid = (startPoint, options) => {
