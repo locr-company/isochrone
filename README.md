@@ -27,7 +27,7 @@ Download and install [Valhalla](https://github.com/valhalla/valhalla) or [OSRM](
 #### 1.2.1. For production
 
 ```bash
-./script/install_service.sh
+./scripts/install_service.sh
 ```
 
 #### 1.2.2. For development
