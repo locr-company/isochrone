@@ -30,7 +30,7 @@
     "start": "cd server && node index.mjs"
   },
   "dependencies": {
-    "@mapbox/polyline": "~1.1.1",
+    "@mapbox/polyline": "~1.2.0",
     "@turf/turf": "~6.5.0",
     "body-parser": "~1.20.2",
     "chalk": "~5.2.0",
