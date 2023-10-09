@@ -118,6 +118,33 @@ function buildOSRMUrls(baseUrl, parameters) {
 	return urls;
 }
 
+function tryAppendDestinationsToResult(result, jsonResult) {
+	if (jsonResult.destinations.length > 1) {
+		if (result.destinations.length === 0) {
+			result.destinations.push(jsonResult.destinations[0]);
+		}
+		for(let i = 1; i < jsonResult.destinations.length; i++) {
+			result.destinations.push(jsonResult.destinations[i]);
+		}
+	}
+}
+
+function tryAppendDurationsToResult(result, jsonResult) {
+	if (jsonResult.durations[0].length > 1) {
+		for(let i = 1; i < jsonResult.durations[0].length; i++) {
+			result.durations[0].push(jsonResult.durations[0][i]);
+		}
+	}
+}
+
+function tryAppendSourcesToResult(result, jsonResult) {
+	if (result.sources.length === 0 && jsonResult.sources.length > 0) {
+		for(const source of jsonResult.sources) {
+			result.sources.push(source);
+		}
+	}
+}
+
 function httpGetJSONPromise(url) {
 	return new Promise((resolve, reject) => {
 		const restCallback = res => {
@@ -176,24 +203,9 @@ async function isochroneOSRM(parameters, options) {
 		if (jsonResult.code !== 'Ok') {
 			break;
 		}
-		if (result.sources.length === 0 && jsonResult.sources.length > 0) {
-			for(const source of jsonResult.sources) {
-				result.sources.push(source);
-			}
-		}
-		if (jsonResult.durations[0].length > 1) {
-			for(let i = 1; i < jsonResult.durations[0].length; i++) {
-				result.durations[0].push(jsonResult.durations[0][i]);
-			}
-		}
-		if (jsonResult.destinations.length > 1) {
-			if (result.destinations.length === 0) {
-				result.destinations.push(jsonResult.destinations[0]);
-			}
-			for(let i = 1; i < jsonResult.destinations.length; i++) {
-				result.destinations.push(jsonResult.destinations[i]);
-			}
-		}
+		tryAppendSourcesToResult(result, jsonResult);
+		tryAppendDurationsToResult(result, jsonResult);
+		tryAppendDestinationsToResult(result, jsonResult);
 	}
 
 	return result;
