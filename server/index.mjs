@@ -152,6 +152,7 @@ const app = Express();
 app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
+app.disable('x-powered-by');
 
 app.get('/api/providers/list', (_req, res) => {
 	const json = {
