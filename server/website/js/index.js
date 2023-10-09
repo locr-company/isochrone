@@ -131,6 +131,32 @@ class IsoChroneDemo {
 		return radius;
 	}
 
+	geoJsonFeatureIsValid(feature) {
+		if (feature.type !== 'Feature') {
+			console.warn(`invalid geojson-feature-type: ${feature.type}`);
+			return false;
+		}
+		if (!feature.geometry) {
+			console.warn('no geojson-feature-geometry');
+			return false;
+		}
+		const geometry = feature.geometry;
+		if (!geometry.type) {
+			console.warn('no type found in geojson-geometry');
+			return false;
+		}
+		if (!geometry.coordinates) {
+			console.warn('no geometry-coordinates found.');
+			return false;
+		}
+		if (!(geometry.coordinates instanceof Array)) {
+			console.warn('geometry-coordinates is not an array');
+			return false;
+		}
+
+		return true;
+	}
+
 	getMarkerCenter() {
 		return this._marker.getLatLng();
 	}
@@ -180,27 +206,11 @@ class IsoChroneDemo {
 		let polygonCounter = 0;
 		const featuresCount = features.length;
 		for(const feature of features) {
-			if (feature.type !== 'Feature') {
-				alert(`invalid geojson-feature-type: ${feature.type}`);
+			if (!this.geoJsonFeatureIsValid(feature)) {
 				continue;
-			}
-			if (!feature.geometry) {
-				alert('no geojson-feature-geometry');
-				continue;
-			}
-			const geometry = feature.geometry;
-			if (!geometry.type) {
-				alert('no type found in geojson-geometry');
-			}
-			if (!geometry.coordinates) {
-				alert('no geometry-coordinates found.');
-				break;
-			}
-			if (!(geometry.coordinates instanceof Array)) {
-				alert('geometry-coordinates is not an array');
-				break;
 			}
 
+			const geometry = feature.geometry;
 			const color = colors[featuresCount - 1 - polygonCounter] || 'white';
 
 			let leafletCoordinates;
