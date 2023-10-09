@@ -61,6 +61,93 @@ function sendInternalServerError(err, res) {
 	res.json(jsonResult);
 }
 
+function parseQueryForCellSize(query) {
+	let cellSize = 0.1;
+	if (query.cell_size) {
+		cellSize = parseFloat(query.cell_size);
+		if (isNaN(cellSize)) {
+			throw new Error(`Invalid "cell_size" value => ${query.cell_size}`);
+		}
+		if (cellSize <= 0) {
+			throw new Error(`Invalid "cell_size" value => ${cellSize}. It must be greater than 0.`);
+		}
+	}
+
+	return cellSize;
+}
+
+function parseQueryForCoordinates(query) {
+	if (!query.latitude) {
+		throw new Error('Missing required parameter "latitude"');
+	}
+	if (!query.longitude) {
+		throw new Error('Missing required parameter "longitude"');
+	}
+	const latitude = parseFloat(query.latitude);
+	const longitude = parseFloat(query.longitude);
+	if (isNaN(latitude)) {
+		throw new Error(`Invalid "latitude" value => ${query.latitude}`);
+	}
+	if (isNaN(longitude)) {
+		throw new Error(`Invalid "longitude" value => ${query.longitude}`);
+	}
+
+	return [longitude, latitude];
+}
+
+function parseQueryForDeintersect(query) {
+	let deintersect = false;
+	if (typeof query.deintersect === 'string') {
+		switch(query.deintersect) {
+			case '1':
+			case 'true':
+			case 'yes':
+			case 'on':
+			case '':
+				deintersect = true;
+				break;
+		}
+	}
+
+	return deintersect;
+}
+
+function parseQueryForInterval(query) {
+	const intervals = [];
+	if (!query.intervals) {
+		throw new Error('Missing required parameter "intervals"');
+	}
+	const intervalsSplitted = query.intervals.split(',');
+	let intervalCounter = 0;
+	for(const intervalsplit of intervalsSplitted) {
+		intervalCounter++;
+		const interval = parseFloat(intervalsplit);
+		if (isNaN(interval)) {
+			throw new Error(`invalid interval[${intervalCounter}] => ${intervalsplit}`);
+		}
+		intervals.push({
+			interval
+		});
+	}
+
+	return intervals;
+}
+
+function parseQueryForRadius(query) {
+	let radius = -1;
+	if (query.radius) {
+		radius = parseFloat(query.radius);
+		if (isNaN(radius)) {
+			throw new Error(`Invalid "radius" value => ${query.radius}`);
+		}
+		if (radius < -1) {
+			throw new Error(`Invalid "radius" value => ${radius}. It must be greater than 0.`);
+		}
+	}
+
+	return radius;
+}
+
 const app = Express();
 app.use(Cors());
 app.use(BodyParser.json());
@@ -96,95 +183,27 @@ app.post('/api/', (req, res) => {
 app.get('/api/', (req, res) => {
 	req.setTimeout(apiTimeout);
 	const query = req.query;
-	const intervals = [];
-	if (!query.intervals) {
-		sendBadRequest('Missing required parameter "intervals"', res);
-		return;
-	}
-	const intervalsSplitted = query.intervals.split(',');
-	let intervalCounter = 0;
-	for(const intervalsplit of intervalsSplitted) {
-		intervalCounter++;
-		const interval = parseFloat(intervalsplit);
-		if (isNaN(interval)) {
-			sendBadRequest(`invalid interval[${intervalCounter}] => ${intervalsplit}`, res);
-			return;
-		}
-		intervals.push({
-			interval
-		});
-	}
-	if (!query.latitude) {
-		sendBadRequest('Missing required parameter "latitude"', res);
-		return;
-	}
-	if (!query.longitude) {
-		sendBadRequest('Missing required parameter "longitude"', res);
-		return;
-	}
-	const latitude = parseFloat(query.latitude);
-	const longitude = parseFloat(query.longitude);
-	if (isNaN(latitude)) {
-		sendBadRequest(`Invalid "latitude" value => ${query.latitude}`, res);
-		return;
-	}
-	if (isNaN(longitude)) {
-		sendBadRequest(`Invalid "longitude" value => ${query.longitude}`, res);
-		return;
-	}
-	let cellSize = 0.1;
-	if (query.cell_size) {
-		cellSize = parseFloat(query.cell_size);
-		if (isNaN(cellSize)) {
-			sendBadRequest(`Invalid "cell_size" value => ${query.cell_size}`, res);
-			return;
-		}
-		if (cellSize <= 0) {
-			sendBadRequest(`Invalid "cell_size" value => ${cellSize}. It must be greater than 0.`, res);
-			return;
-		}
-	}
-	let radius = -1;
-	if (query.radius) {
-		radius = parseFloat(query.radius);
-		if (isNaN(radius)) {
-			sendBadRequest(`Invalid "radius" value => ${query.radius}`, res);
-			return;
-		}
-		if (radius < -1) {
-			sendBadRequest(`Invalid "radius" value => ${radius}. It must be greater than 0.`, res);
-			return;
-		}
-	}
-	let deintersect = false;
-	if (typeof query.deintersect === 'string') {
-		switch(query.deintersect) {
-			case '1':
-			case 'true':
-			case 'yes':
-			case 'on':
-			case '':
-				deintersect = true;
-				break;
-		}
-	}
 
-	const options = {
-		origin: {
-			type: 'Point',
-			coordinates: [longitude, latitude]
-		},
-		deintersect,
-		cellSize,
-		provider: query.provider || DEFAULT_PROVIDER,
-		profile: query.profile || 'car',
-		radius,
-		intervals
-	};
+	try {
+		const options = {
+			origin: {
+				type: 'Point',
+				coordinates: parseQueryForCoordinates(req.query)
+			},
+			deintersect: parseQueryForDeintersect(req.query),
+			cellSize: parseQueryForCellSize(req.query),
+			provider: query.provider || DEFAULT_PROVIDER,
+			profile: query.profile || 'car',
+			radius: parseQueryForRadius(req.radius),
+			intervals: parseQueryForInterval(req.query)
+		};
 
-	run(options)
-		.then(data => res.json(data))
-		.catch(err => sendInternalServerError(err, res));
+		run(options)
+			.then(data => res.json(data))
+			.catch(err => sendInternalServerError(err, res));
+	} catch(err) {
+		sendBadRequest(err.message, res);
+	}
 });
 
 const httpPort = (argv.p || process.env.PORT) || defaultPort;
