@@ -155,23 +155,6 @@ class IsoChroneDemo {
 			return;
 		}
 
-		const reverseLatLongCoordinates = function(coordinates) {
-			const leafletCoordinates = [];
-			for(const subCoordinates of coordinates) {
-				const leafletCoordinatesSub = [];
-				for(const point of subCoordinates) {
-					leafletCoordinatesSub.push([point[1], point[0]]);
-				}
-				leafletCoordinates.push(leafletCoordinatesSub);
-			}
-
-			return leafletCoordinates;
-		};
-
-		const colors = ['lime', 'yellow', 'red'];
-		let polygonCounter = 0;
-		let featuresCount = 0;
-
 		switch(json.type) {
 			case 'Feature':
 				alert(`unhandled geojson-type: ${json.type}`);
@@ -183,67 +166,73 @@ class IsoChroneDemo {
 					break;
 				}
 
-				featuresCount = json.features.length;
-				for(const feature of json.features) {
-					if (feature.type !== 'Feature') {
-						alert(`invalid geojson-feature-type: ${feature.type}`);
-						continue;
-					}
-					if (!feature.geometry) {
-						alert('no geojson-feature-geometry');
-						continue;
-					}
-					const geometry = feature.geometry;
-					if (!geometry.type) {
-						alert('no type found in geojson-geometry');
-					}
-					if (!geometry.coordinates) {
-						alert('no geometry-coordinates found.');
-						break;
-					}
-					if (!(geometry.coordinates instanceof Array)) {
-						alert('geometry-coordinates is not an array');
-						break;
-					}
-
-					const color = colors[featuresCount - 1 - polygonCounter] || 'white';
-
-					let leafletCoordinates;
-					let polygon;
-					let multiPolygon;
-					let multiCoordinates;
-					switch(geometry.type) {
-						case 'Polygon':
-							leafletCoordinates = reverseLatLongCoordinates(geometry.coordinates);
-							polygon = L.polygon(leafletCoordinates, { color });
-							polygon.addTo(this._map);
-							this._polygons.push(polygon);
-
-							polygonCounter++;
-							break;
-
-						case 'MultiPolygon':
-							multiCoordinates = geometry.coordinates;
-							for(const i in multiCoordinates) {
-								multiCoordinates[i] = reverseLatLongCoordinates(multiCoordinates[i]);
-							}
-							multiPolygon = L.polygon(multiCoordinates, { color });
-							multiPolygon.addTo(this._map);
-							this._polygons.push(multiPolygon);
-
-							polygonCounter++;
-							break;
-
-						default:
-							alert(`unhandled geometry-type: ${geometry.type}`);
-							break;
-					}
-				}
+				this.processFeatureCollection(json.features);
 				break;
 
 			default:
 				alert(`invalid geojson-type: ${json.type}`);
 				break;
+		}
+	}
+
+	processFeatureCollection(features) {
+		const colors = ['lime', 'yellow', 'red'];
+		let polygonCounter = 0;
+		const featuresCount = features.length;
+		for(const feature of features) {
+			if (feature.type !== 'Feature') {
+				alert(`invalid geojson-feature-type: ${feature.type}`);
+				continue;
+			}
+			if (!feature.geometry) {
+				alert('no geojson-feature-geometry');
+				continue;
+			}
+			const geometry = feature.geometry;
+			if (!geometry.type) {
+				alert('no type found in geojson-geometry');
+			}
+			if (!geometry.coordinates) {
+				alert('no geometry-coordinates found.');
+				break;
+			}
+			if (!(geometry.coordinates instanceof Array)) {
+				alert('geometry-coordinates is not an array');
+				break;
+			}
+
+			const color = colors[featuresCount - 1 - polygonCounter] || 'white';
+
+			let leafletCoordinates;
+			let polygon;
+			let multiPolygon;
+			let multiCoordinates;
+			switch(geometry.type) {
+				case 'Polygon':
+					leafletCoordinates = this.reverseLatLongCoordinates(geometry.coordinates);
+					polygon = L.polygon(leafletCoordinates, { color });
+					polygon.addTo(this._map);
+					this._polygons.push(polygon);
+
+					polygonCounter++;
+					break;
+
+				case 'MultiPolygon':
+					multiCoordinates = geometry.coordinates;
+					for(const i in multiCoordinates) {
+						multiCoordinates[i] = this.reverseLatLongCoordinates(multiCoordinates[i]);
+					}
+					multiPolygon = L.polygon(multiCoordinates, { color });
+					multiPolygon.addTo(this._map);
+					this._polygons.push(multiPolygon);
+
+					polygonCounter++;
+					break;
+
+				default:
+					alert(`unhandled geometry-type: ${geometry.type}`);
+					break;
+			}
 		}
 	}
 
@@ -302,6 +291,19 @@ class IsoChroneDemo {
 				alert(exc);
 			});
 	}
+
+	reverseLatLongCoordinates(coordinates) {
+		const leafletCoordinates = [];
+		for(const subCoordinates of coordinates) {
+			const leafletCoordinatesSub = [];
+			for(const point of subCoordinates) {
+				leafletCoordinatesSub.push([point[1], point[0]]);
+			}
+			leafletCoordinates.push(leafletCoordinatesSub);
+		}
+
+		return leafletCoordinates;
+	};
 }
 
 let isochroneDemo = null;
