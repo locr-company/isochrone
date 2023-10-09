@@ -116,7 +116,7 @@ async function isochroneOSRM(parameters, options) {
 	}
 	const originLatitude = origin[1];
 	const originLongitude = origin[0].toString();
-	if (!originLongitude.match(/^-?\d{1,3}(\.\d+)?$/)) {
+	if (!/^-?\d{1,3}(\.\d+)?$/.exec(originLongitude)) {
 		throw new Error('The longitude of the origin is invalid.');
 	}
 	if (originLatitude > 90 || originLatitude < -90) {
