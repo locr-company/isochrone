@@ -2,12 +2,16 @@ ARG environment
 
 FROM ubuntu:22.04 AS base
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y curl git jq
+RUN apt update && \
+    apt upgrade -y && \
+    apt install -y ca-certificates curl git gnupg jq
 
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
+RUN apt update && \
+    apt install -y nodejs
 RUN npm install -g npm
 
 FROM base AS version-for-dev
