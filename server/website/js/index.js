@@ -305,89 +305,6 @@ let isochroneDemo = null;
 
 L.Control.IsoChrone = L.Control.extend({
 	onAdd: function(_map) {
-		const buildCheckboxInputRow = function(col1Content, inputId, defaults) {
-			const tRow = document.createElement('tr');
-			const tCol1 = document.createElement('td');
-			const label = document.createElement('label');
-			label.setAttribute('for', inputId);
-			label.appendChild(document.createTextNode(col1Content));
-			tCol1.appendChild(label);
-			tRow.appendChild(tCol1);
-			const tCol2 = document.createElement('td');
-			tCol2.style.width = '75px';
-			const input = document.createElement('input');
-			input.id = inputId;
-			input.type = 'checkbox';
-			if (defaults) {
-				if (typeof defaults.checked === 'boolean') {
-					input.checked = defaults.checked;
-				}
-			}
-			input.style.width = '100%';
-			tCol2.appendChild(input);
-			tRow.appendChild(tCol2);
-
-			return tRow;
-		};
-
-		const buildNumberInputRow = function(col1Content, inputId, defaults) {
-			const tRow = document.createElement('tr');
-			const tCol1 = document.createElement('td');
-			const label = document.createElement('label');
-			label.setAttribute('for', inputId);
-			label.appendChild(document.createTextNode(col1Content));
-			tCol1.appendChild(label);
-			tRow.appendChild(tCol1);
-			const tCol2 = document.createElement('td');
-			tCol2.style.width = '75px';
-			const input = document.createElement('input');
-			input.id = inputId;
-			input.type = 'number';
-			if (defaults) {
-				if (typeof defaults.value === 'number') {
-					input.value = defaults.value;
-				}
-				if (typeof defaults.min === 'number') {
-					input.min = defaults.min;
-				}
-				if (typeof defaults.step === 'number') {
-					input.step = defaults.step;
-				}
-			}
-			input.style.width = '100%';
-			tCol2.appendChild(input);
-			tRow.appendChild(tCol2);
-
-			return tRow;
-		};
-
-		const buildSelectRow = function(col1Content, selectId, values, defaultValue) {
-			const tRow = document.createElement('tr');
-			const tCol1 = document.createElement('td');
-			const label = document.createElement('label');
-			label.setAttribute('for', selectId);
-			label.appendChild(document.createTextNode(col1Content));
-			tCol1.appendChild(label);
-			const tCol2 = document.createElement('td');
-			const select = document.createElement('select');
-			select.id = selectId;
-			select.style.width = '100%';
-			for(const provider of values) {
-				const providerOption = document.createElement('option');
-				providerOption.value = provider;
-				if (provider === defaultValue) {
-					providerOption.selected = true;
-				}
-				providerOption.appendChild(document.createTextNode(provider));
-				select.appendChild(providerOption);
-			}
-			tCol2.appendChild(select);
-			tRow.appendChild(tCol1);
-			tRow.appendChild(tCol2);
-
-			return tRow;
-		};
-
 		const container = document.createElement('div');
 		container.classList.add('leaflet-bar');
 		container.id = 'isochrone-control';
@@ -421,25 +338,25 @@ L.Control.IsoChrone = L.Control.extend({
 			}
 		}
 		const defaultProvider = this.options.defaultProvider || '';
-		const tRowProvider = buildSelectRow('provider:', 'isochrone-provider', providers, defaultProvider);
+		const tRowProvider = this.buildSelectRow('provider:', 'isochrone-provider', providers, defaultProvider);
 		tBody.appendChild(tRowProvider);
 
-		const tRowInterval1 = buildNumberInputRow('interval 1 (min):', 'isochrone-interval-1', { value: 2, min: 0.1, step: 0.1 });
+		const tRowInterval1 = this.buildNumberInputRow('interval 1 (min):', 'isochrone-interval-1', { value: 2, min: 0.1, step: 0.1 });
 		tBody.appendChild(tRowInterval1);
 
-		const tRowInterval2 = buildNumberInputRow('interval 2 (min):', 'isochrone-interval-2', { value: 0, min: 0, step: 0.1 });
+		const tRowInterval2 = this.buildNumberInputRow('interval 2 (min):', 'isochrone-interval-2', { value: 0, min: 0, step: 0.1 });
 		tBody.appendChild(tRowInterval2);
 
-		const tRowInterval3 = buildNumberInputRow('interval 3 (min):', 'isochrone-interval-3', { value: 0, min: 0, step: 0.1 });
+		const tRowInterval3 = this.buildNumberInputRow('interval 3 (min):', 'isochrone-interval-3', { value: 0, min: 0, step: 0.1 });
 		tBody.appendChild(tRowInterval3);
 
-		const tRowRadius = buildNumberInputRow('radius (km):', 'isochrone-radius', { value: -1, min: -1, step: 1 });
+		const tRowRadius = this.buildNumberInputRow('radius (km):', 'isochrone-radius', { value: -1, min: -1, step: 1 });
 		tBody.appendChild(tRowRadius);
 
-		const tRowCellSize = buildNumberInputRow('cell-size (km):', 'isochrone-cell-size', { value: 0.1, min: 0.1, step: 0.1 });
+		const tRowCellSize = this.buildNumberInputRow('cell-size (km):', 'isochrone-cell-size', { value: 0.1, min: 0.1, step: 0.1 });
 		tBody.appendChild(tRowCellSize);
 
-		const tRowDeintersect = buildCheckboxInputRow('deintersect:', 'isochrone-deintersect', { checked: true });
+		const tRowDeintersect = this.buildCheckboxInputRow('deintersect:', 'isochrone-deintersect', { checked: true });
 		tBody.appendChild(tRowDeintersect);
 
 		const tFootRow = document.createElement('tr');
@@ -461,6 +378,86 @@ L.Control.IsoChrone = L.Control.extend({
 		container.appendChild(contentContainer);
 
 		return container;
+	},
+	buildCheckboxInputRow: function(col1Content, inputId, defaults) {
+		const tRow = document.createElement('tr');
+		const tCol1 = document.createElement('td');
+		const label = document.createElement('label');
+		label.setAttribute('for', inputId);
+		label.appendChild(document.createTextNode(col1Content));
+		tCol1.appendChild(label);
+		tRow.appendChild(tCol1);
+		const tCol2 = document.createElement('td');
+		tCol2.style.width = '75px';
+		const input = document.createElement('input');
+		input.id = inputId;
+		input.type = 'checkbox';
+		if (defaults) {
+			if (typeof defaults.checked === 'boolean') {
+				input.checked = defaults.checked;
+			}
+		}
+		input.style.width = '100%';
+		tCol2.appendChild(input);
+		tRow.appendChild(tCol2);
+
+		return tRow;
+	},
+	buildNumberInputRow: function(col1Content, inputId, defaults) {
+		const tRow = document.createElement('tr');
+		const tCol1 = document.createElement('td');
+		const label = document.createElement('label');
+		label.setAttribute('for', inputId);
+		label.appendChild(document.createTextNode(col1Content));
+		tCol1.appendChild(label);
+		tRow.appendChild(tCol1);
+		const tCol2 = document.createElement('td');
+		tCol2.style.width = '75px';
+		const input = document.createElement('input');
+		input.id = inputId;
+		input.type = 'number';
+		if (defaults) {
+			if (typeof defaults.value === 'number') {
+				input.value = defaults.value;
+			}
+			if (typeof defaults.min === 'number') {
+				input.min = defaults.min;
+			}
+			if (typeof defaults.step === 'number') {
+				input.step = defaults.step;
+			}
+		}
+		input.style.width = '100%';
+		tCol2.appendChild(input);
+		tRow.appendChild(tCol2);
+
+		return tRow;
+	},
+	buildSelectRow: function(col1Content, selectId, values, defaultValue) {
+		const tRow = document.createElement('tr');
+		const tCol1 = document.createElement('td');
+		const label = document.createElement('label');
+		label.setAttribute('for', selectId);
+		label.appendChild(document.createTextNode(col1Content));
+		tCol1.appendChild(label);
+		const tCol2 = document.createElement('td');
+		const select = document.createElement('select');
+		select.id = selectId;
+		select.style.width = '100%';
+		for(const provider of values) {
+			const providerOption = document.createElement('option');
+			providerOption.value = provider;
+			if (provider === defaultValue) {
+				providerOption.selected = true;
+			}
+			providerOption.appendChild(document.createTextNode(provider));
+			select.appendChild(providerOption);
+		}
+		tCol2.appendChild(select);
+		tRow.appendChild(tCol1);
+		tRow.appendChild(tCol2);
+
+		return tRow;
 	}
 });
 
