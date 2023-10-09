@@ -116,7 +116,7 @@ async function isochroneOSRM(parameters, options) {
 	}
 	const originLatitude = origin[1];
 	const originLongitude = origin[0].toString();
-	if (!originLongitude.match(/^-?[0-9]{1,3}(\.[0-9]+)?$/)) {
+	if (!originLongitude.match(/^-?\d{1,3}(\.\d+)?$/)) {
 		throw new Error('The longitude of the origin is invalid.');
 	}
 	if (originLatitude > 90 || originLatitude < -90) {
@@ -186,9 +186,8 @@ async function isochroneOSRM(parameters, options) {
 function deintersectGeoJSONFeatures(features) {
 	for(let i = 0; i < features.length - 1; i++) {
 		for(let j = i; j < features.length - 1; j++) {
-			const properties = Object.assign({}, features[i].properties);
 			features[i] = turf.union(features[i], features[j + 1]);
-			features[i].properties = properties;
+			features[i].properties = { ...features[i].properties };
 		}
 	}
 	for(let i = 0; i < features.length - 1; i++) {
