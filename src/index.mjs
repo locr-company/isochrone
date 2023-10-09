@@ -62,6 +62,62 @@ const makePolygons = (pointsByInterval, options) => {
 const VALID_PROVIDERS = ['osrm', 'valhalla'];
 const DEFAULT_PROVIDER = 'valhalla';
 
+function buildOSRMBaseUrl(options, coordinates) {
+	const profile = options.profile;
+	const profiles = ['car', 'bicycle', 'foot'];
+	if (profiles.indexOf(profile) === -1) {
+		throw new Error(`Invalid profile: ${profile}`);
+	}
+
+	const origin = coordinates[0];
+	if (typeof origin[0] !== 'number' || typeof origin[1] !== 'number') {
+		throw new Error('The origin has an invalid type for the coordinates.');
+	}
+	const originLatitude = origin[1];
+	const originLongitude = origin[0].toString();
+	if (!/^-?\d{1,3}(\.\d+)?$/.exec(originLongitude)) {
+		throw new Error('The longitude of the origin is invalid.');
+	}
+	if (originLatitude > 90 || originLatitude < -90) {
+		throw new Error('The latitude of the origin is out of range.');
+	}
+
+	// Devskim: ignore DS137138
+	return `http://127.0.0.1:5000/table/v1/${profile}/${originLongitude},${originLatitude}`;
+}
+
+function buildOSRMUrls(baseUrl, parameters) {
+	const coordinates = parameters.coordinates;
+
+	const urlParams = new URLSearchParams();
+	urlParams.set('sources', parameters.sources.join(';'));
+	const urlParamsString = urlParams.toString();
+
+	const coordinatesPerRequest = 5000;
+	const totalRequests = Math.ceil(coordinates.length / coordinatesPerRequest);
+	const urls = [];
+	for(let i = 0; i < totalRequests; i++) {
+		let url = baseUrl;
+		let coordinateCounter = 0;
+		const firstRequestOffset = (i === 0) ? 1 : 0;
+		for(let j = i * coordinatesPerRequest + firstRequestOffset; j < i * coordinatesPerRequest + coordinatesPerRequest; j++) {
+			const coordinate = coordinates[j];
+			if (!coordinate) {
+				break;
+			}
+			coordinateCounter++;
+			url += `;${coordinate[0]},${coordinate[1]}`;
+		}
+		if (coordinateCounter === 0) {
+			break;
+		}
+		url += `?${urlParamsString}`;
+		urls.push(url);
+	}
+
+	return urls;
+}
+
 function httpGetJSONPromise(url) {
 	return new Promise((resolve, reject) => {
 		const restCallback = res => {
@@ -103,48 +159,8 @@ function httpGetJSONPromise(url) {
 }
 
 async function isochroneOSRM(parameters, options) {
-	const profile = options.profile;
-	const profiles = ['car', 'bicycle', 'foot'];
-	if (profiles.indexOf(profile) === -1) {
-		throw new Error(`Invalid profile: ${profile}`);
-	}
-
-	const coordinates = parameters.coordinates;
-	const origin = coordinates[0];
-	if (typeof origin[0] !== 'number' || typeof origin[1] !== 'number') {
-		throw new Error('The origin has an invalid type for the coordinates.');
-	}
-	const originLatitude = origin[1];
-	const originLongitude = origin[0].toString();
-	if (!/^-?\d{1,3}(\.\d+)?$/.exec(originLongitude)) {
-		throw new Error('The longitude of the origin is invalid.');
-	}
-	if (originLatitude > 90 || originLatitude < -90) {
-		throw new Error('The latitude of the origin is out of range.');
-	}
-
-	const coordinatesPerRequest = 5000;
-	const totalRequests = Math.ceil(coordinates.length / coordinatesPerRequest);
-	const urls = [];
-	for(let i = 0; i < totalRequests; i++) {
-		// Devskim: ignore DS137138
-		let url = `http://127.0.0.1:5000/table/v1/${profile}/${originLongitude},${originLatitude}`;
-		let coordinateCounter = 0;
-		const firstRequestOffset = (i === 0) ? 1 : 0;
-		for(let j = i * coordinatesPerRequest + firstRequestOffset; j < i * coordinatesPerRequest + coordinatesPerRequest; j++) {
-			const coordinate = coordinates[j];
-			if (!coordinate) {
-				break;
-			}
-			coordinateCounter++;
-			url += `;${coordinate[0]},${coordinate[1]}`;
-		}
-		if (coordinateCounter === 0) {
-			break;
-		}
-		url += `?sources=${parameters.sources.join(';')}`;
-		urls.push(url);
-	}
+	const baseUrl = buildOSRMBaseUrl(options, parameters.coordinates);
+	const urls = buildOSRMUrls(baseUrl, parameters);
 
 	const result = {
 		code: 'Error',
