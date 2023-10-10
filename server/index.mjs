@@ -149,7 +149,6 @@ function parseQueryForRadius(query) {
 }
 
 const app = Express();
-app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
 app.disable('x-powered-by');
