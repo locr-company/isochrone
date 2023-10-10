@@ -12,7 +12,6 @@
 import log from '../src/util/log.mjs';
 import _ from 'lodash';
 import BodyParser from 'body-parser';
-import Cors from 'cors';
 import Express from 'express';
 import { IsoChrone, DEFAULT_PROVIDER, VALID_PROVIDERS } from '../src/index.mjs';
 import Yargs from 'yargs';
