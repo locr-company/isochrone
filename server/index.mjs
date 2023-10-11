@@ -193,7 +193,7 @@ app.get('/api/', (req, res) => {
 			cellSize: parseQueryForCellSize(req.query),
 			provider: query.provider || DEFAULT_PROVIDER,
 			profile: query.profile || 'car',
-			radius: parseQueryForRadius(req.radius),
+			radius: parseQueryForRadius(req.query),
 			intervals: parseQueryForInterval(req.query)
 		};
 
