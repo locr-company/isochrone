@@ -214,8 +214,9 @@ async function isochroneOSRM(parameters, options) {
 function deintersectGeoJSONFeatures(features) {
 	for(let i = 0; i < features.length - 1; i++) {
 		for(let j = i; j < features.length - 1; j++) {
+			const savedProperties = { ...features[i].properties };
 			features[i] = turf.union(features[i], features[j + 1]);
-			features[i].properties = { ...features[i].properties };
+			features[i].properties = savedProperties;
 		}
 	}
 	for(let i = 0; i < features.length - 1; i++) {
