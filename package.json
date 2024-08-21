@@ -27,7 +27,8 @@
     "npm": ">=8"
   },
   "scripts": {
-    "lint:js": "eslint src/*.mjs src/**/*.mjs",
+    "dev:lint:eslint": "eslint src/*.mjs src/**/*.mjs server/*.mjs server/**/*.js",
+    "dev:lint:standardjs": "standard src/*.mjs src/**/*.mjs server/*.mjs server/**/*.js",
     "start": "cd server && node index.mjs",
     "start:dev": "cd server && node --watch index.mjs"
   },
@@ -43,10 +44,20 @@
     "single-line-log": "~1.1",
     "yargs": "~17.7"
   },
-  "keywords": [],
+  "peerDependencies": {
+    "leaflet": "^1.7"
+  },
   "devDependencies": {
     "@eslint/js": "^9.9",
+    "@types/leaflet": "^1.9",
     "eslint": "^9.9",
-    "globals": "^15.9"
+    "globals": "^15.9",
+    "standard": "^17.1"
+  },
+  "keywords": [],
+  "standard": {
+    "globals": [
+      "L"
+    ]
   }
 }
