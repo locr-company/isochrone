@@ -214,13 +214,11 @@ async function isochroneOSRM(parameters, options) {
 function deintersectGeoJSONFeatures(features) {
 	for(let i = 0; i < features.length - 1; i++) {
 		for(let j = i; j < features.length - 1; j++) {
-			const savedProperties = { ...features[i].properties };
-			features[i] = turf.union(features[i], features[j + 1]);
-			features[i].properties = savedProperties;
+			features[i] = turf.union(turf.featureCollection([features[i], features[j + 1]]), { properties: features[i].properties });
 		}
 	}
 	for(let i = 0; i < features.length - 1; i++) {
-		features[i] = turf.difference(features[i], features[i + 1]);
+		features[i] = turf.difference(turf.featureCollection([features[i], features[i + 1]]));
 	}
 
 	return features;

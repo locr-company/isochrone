@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved Dockerfile (changed base image from ubuntu:22.04 to node:20)
 - Improved install_service.sh
 
+### Fixed
+
+- Usage of new turf library version
+
 ## [1.2.2] - 2023-10-16
 
 ### Fixed
