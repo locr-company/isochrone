@@ -23,30 +23,30 @@
   "license": "MIT",
   "main": "src/index.mjs",
   "engines": {
-    "node": ">=16",
+    "node": ">=18",
     "npm": ">=8"
   },
   "scripts": {
-    "start": "cd server && node index.mjs"
+    "lint:js": "eslint src/*.mjs src/**/*.mjs",
+    "start": "cd server && node index.mjs",
+    "start:dev": "cd server && node --watch index.mjs"
   },
   "dependencies": {
-    "@mapbox/polyline": "~1.2.1",
-    "@turf/turf": "~7.1.0",
-    "body-parser": "~1.20.2",
-    "chalk": "~5.3.0",
-    "concaveman": "1.2.1",
-    "cors": "~2.8.5",
-    "express": "~4.19.2",
-    "lodash": "~4.17.21",
-    "single-line-log": "~1.1.2",
-    "yargs": "~17.7.2"
+    "@mapbox/polyline": "~1.2",
+    "@turf/turf": "~7.1",
+    "body-parser": "~1.20",
+    "chalk": "~5.3",
+    "concaveman": "1.2",
+    "cors": "~2.8",
+    "express": "~4.19",
+    "lodash": "~4.17",
+    "single-line-log": "~1.1",
+    "yargs": "~17.7"
   },
+  "keywords": [],
   "devDependencies": {
-    "eslint": "^8.57.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.6.0"
-  },
-  "keywords": []
+    "@eslint/js": "^9.9",
+    "eslint": "^9.9",
+    "globals": "^15.9"
+  }
 }
