@@ -37,10 +37,7 @@ Download and install [Valhalla](https://github.com/valhalla/valhalla) or [OSRM](
 #### 1.2.2. For development
 
 ```bash
-podman build --tag=isochrone-dev --build-arg environment=dev .
-podman run --rm -it -v ${PWD}:/app --network=host --name=isochrone-dev isochrone-dev /bin/bash
-npm install
-npm start
+ENV=dev ./scripts/install_service.sh
 ```
 
 ### 1.3. Add nginx config (optional)

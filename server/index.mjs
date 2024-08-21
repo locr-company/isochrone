@@ -162,6 +162,7 @@ app.get('/api/providers/list', (_req, res) => {
 });
 app.get('/api/status', (req, res) => {
 	const json = {
+		data: {},
 		machine: {
 			'load-average': os.loadavg()
 		},
@@ -170,6 +171,14 @@ app.get('/api/status', (req, res) => {
 			'total-tasks': totalTasks
 		}
 	};
+
+	const provider = req.query.provider || DEFAULT_PROVIDER;
+	if (provider === 'valhalla' && process.env.VALHALLA_DATA_DATE) {
+		json.data.date = process.env.VALHALLA_DATA_DATE;
+	} else if (provider === 'osrm' && process.env.OSRM_DATA_DATE) {
+		json.data.date = process.env.OSRM_DATA_DATE;
+	}
+
 	res.setHeader('Content-Type', 'application/json');
 	res.end(JSON.stringify(json));
 });
