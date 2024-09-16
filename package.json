@@ -39,7 +39,7 @@
     "chalk": "~5.3",
     "concaveman": "1.2",
     "cors": "~2.8",
-    "express": "~4.19",
+    "express": "~4.21",
     "lodash": "~4.17",
     "single-line-log": "~1.1",
     "yargs": "~17.7"
