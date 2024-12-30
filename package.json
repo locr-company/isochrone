@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@mapbox/polyline": "~1.2",
-    "@turf/turf": "~7.1",
+    "@turf/turf": "~7.2",
     "body-parser": "~1.20",
     "chalk": "~5.4",
     "concaveman": "1.2",
