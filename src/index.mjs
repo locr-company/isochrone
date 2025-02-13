@@ -249,7 +249,7 @@ async function isochroneValhalla (startPoint, options) {
 }
 
 /**
- * @param {GeoJSON} origin Example: { type: "Point", coordinates: [ 9.86557, 52.3703 ] }
+ * @param {{type: 'Point', coordinates: number[]}} origin Example: { type: "Point", coordinates: [ 9.86557, 52.3703 ] }
  * @param {Object} options object
  * @param {number} options.cellSize - the distance across each cell as in [@turf/point-grid](https://github.com/Turfjs/turf/tree/master/packages/turf-point-grid)
  * @param {number} [options.concavity=2] - relative measure of concavity as in [concaveman](https://github.com/mapbox/concaveman)

@@ -35,7 +35,7 @@
   "dependencies": {
     "@mapbox/polyline": "~1.2",
     "@turf/turf": "~7.2",
-    "body-parser": "~1.20",
+    "body-parser": "~2.1",
     "chalk": "~5.4",
     "concaveman": "1.2",
     "cors": "~2.8",
