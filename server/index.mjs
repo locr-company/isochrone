@@ -268,8 +268,8 @@ async function run (options) {
     if (typeof coord !== 'number') {
       throw new Error('Invalid "origin" value. Must contain 2 numbers.')
     }
+    origin.coordinates.push(coord)
   }
-  origin.coordinates = options.origin.coordinates
 
   try {
     runningTasks++
