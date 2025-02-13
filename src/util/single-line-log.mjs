@@ -47,6 +47,10 @@ export default function (stream) {
     if (prevLines.length > MAX_PREV_LINES) {
       prevLines = prevLines.slice(0, MAX_PREV_LINES)
     }
+    if (!(prevLines instanceof Array)) {
+      return
+    }
+
     prevLineCount = 0
     for (let i = 0; i < prevLines.length; i++) {
       prevLineCount += Math.ceil(stringWidth(prevLines[i]) / stream.columns) || 1
