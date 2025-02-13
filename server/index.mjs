@@ -250,10 +250,31 @@ async function run (options) {
     throw new Error(`Invalid provider (${options.provider})`)
   }
 
+  const origin = {
+    type: 'Point',
+    coordinates: []
+  }
+
+  if (!options.origin) {
+    throw new Error('Missing required parameter "origin"')
+  }
+  if (!(options.origin.coordinates instanceof Array)) {
+    throw new Error('Invalid "origin" value. Must be an array.')
+  }
+  if (options.origin.coordinates.length !== 2) {
+    throw new Error('Invalid "origin" value. Must contain 2 elements.')
+  }
+  for (const coord of options.origin.coordinates) {
+    if (typeof coord !== 'number') {
+      throw new Error('Invalid "origin" value. Must contain 2 numbers.')
+    }
+  }
+  origin.coordinates = options.origin.coordinates
+
   try {
     runningTasks++
     totalTasks++
-    return await IsoChrone(options.origin, options)
+    return await IsoChrone(origin, options)
   } finally {
     runningTasks--
   }
