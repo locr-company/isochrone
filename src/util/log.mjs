@@ -5,7 +5,7 @@
  * @license MIT
  */
 import chalk from 'chalk'
-import singleLineLog from 'single-line-log'
+import singleLineLog from './single-line-log.mjs'
 
 const write = singleLineLog(process.stderr)
 

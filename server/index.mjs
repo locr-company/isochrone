@@ -116,6 +116,9 @@ function parseQueryForInterval (query) {
   if (!query.intervals) {
     throw new Error('Missing required parameter "intervals"')
   }
+  if (typeof query.intervals !== 'string') {
+    throw new Error('Invalid "intervals" value')
+  }
   const intervalsSplitted = query.intervals.split(',')
   let intervalCounter = 0
   for (const intervalsplit of intervalsSplitted) {
