@@ -94,8 +94,14 @@ function buildOSRMBaseUrl (options, coordinates) {
 function buildOSRMUrls (baseUrl, parameters) {
   const coordinates = parameters.coordinates
 
+  if (!(parameters.sources instanceof Array)) {
+    throw new Error('Invalid sources parameter. Must be an array.')
+  }
+
+  const sources = parameters.sources
+
   const urlParams = new URLSearchParams()
-  urlParams.set('sources', parameters.sources.join(';'))
+  urlParams.set('sources', sources.join(';'))
   const urlParamsString = urlParams.toString()
 
   const coordinatesPerRequest = 5000
@@ -107,14 +113,16 @@ function buildOSRMUrls (baseUrl, parameters) {
     const firstRequestOffset = (i === 0) ? 1 : 0
     for (let j = i * coordinatesPerRequest + firstRequestOffset; j < i * coordinatesPerRequest + coordinatesPerRequest; j++) {
       const coordinate = coordinates[j]
-      if (!coordinate) {
+      if (!(coordinate instanceof Array)) {
         break
       }
-      if (typeof coordinate[0] !== 'number' || typeof coordinate[1] !== 'number') {
+      if (coordinate.length < 2) {
         break
       }
-      coordinateCounter++
-      url += `;${coordinate[0]},${coordinate[1]}`
+      if (typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number') {
+        coordinateCounter++
+        url += `;${coordinate[0]},${coordinate[1]}`
+      }
     }
     if (coordinateCounter === 0) {
       break
