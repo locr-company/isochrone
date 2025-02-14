@@ -86,6 +86,11 @@ function buildOSRMBaseUrl (options, coordinates) {
   return `http://127.0.0.1:5000/table/v1/${profile}/${originLongitude},${originLatitude}`
 }
 
+/**
+ * @param {string} baseUrl
+ * @param {*} parameters
+ * @returns {string[]}
+ */
 function buildOSRMUrls (baseUrl, parameters) {
   const coordinates = parameters.coordinates
 
@@ -103,6 +108,9 @@ function buildOSRMUrls (baseUrl, parameters) {
     for (let j = i * coordinatesPerRequest + firstRequestOffset; j < i * coordinatesPerRequest + coordinatesPerRequest; j++) {
       const coordinate = coordinates[j]
       if (!coordinate) {
+        break
+      }
+      if (typeof coordinate[0] !== 'number' || typeof coordinate[1] !== 'number') {
         break
       }
       coordinateCounter++
@@ -236,7 +244,9 @@ async function isochroneValhalla (startPoint, options) {
   }
   if (options.intervals instanceof Array) {
     for (const interval of options.intervals) {
-      json.contours.push({ time: interval })
+      if (typeof interval === 'number') {
+        json.contours.push({ time: interval })
+      }
     }
   }
   // Devskim: ignore DS137138

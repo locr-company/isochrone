@@ -225,8 +225,17 @@ app.listen(httpPort, () => {
 
 // Parse the parameter and call isodist
 async function run (options) {
-  if (options.intervals instanceof Array) {
-    options.intervals = _.map(options.intervals, 'interval')
+  if (!(options.intervals instanceof Array)) {
+    throw new Error('Invalid "intervals" value. Must be an array.')
+  }
+  options.intervals = _.map(options.intervals, 'interval')
+  for (const interval of options.intervals) {
+    if (typeof interval !== 'number') {
+      throw new Error('Invalid "intervals" value. Must contain numbers.')
+    }
+    if (interval <= 0) {
+      throw new Error('Invalid "intervals" value. Must contain positive numbers.')
+    }
   }
 
   options = _.defaults(options, {
