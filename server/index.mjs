@@ -176,6 +176,9 @@ app.get('/api/status', (req, res) => {
   }
 
   const provider = req.query.provider || DEFAULT_PROVIDER
+  if (VALID_PROVIDERS.indexOf(provider) === -1) {
+    throw new Error(`Invalid provider (${provider})`)
+  }
   if (provider === 'valhalla' && process.env.VALHALLA_DATA_DATE) {
     json.data.date = process.env.VALHALLA_DATA_DATE
   } else if (provider === 'osrm' && process.env.OSRM_DATA_DATE) {
