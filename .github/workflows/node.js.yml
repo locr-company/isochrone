@@ -29,7 +29,10 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: npm-${{ matrix.node-version }}
+        cache: 'npm'
+        key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ matrix.node-version }}
     - run: npm ci
     - run: npm run dev:lint:eslint
     - run: npm run dev:lint:standardjs
