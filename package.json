@@ -47,7 +47,7 @@
     "leaflet": "^1.7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.25",
+    "@eslint/js": "^9.27",
     "@types/leaflet": "^1.9",
     "eslint": "^9.26",
     "globals": "^16.1",
