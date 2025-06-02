@@ -1,6 +1,6 @@
 ARG environment
 
-FROM node:20 AS base
+FROM node:22 AS base
 
 ARG environment
 ENV NODE_ENV=${environment}
