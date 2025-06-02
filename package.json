@@ -27,8 +27,8 @@
     "npm": ">=8"
   },
   "scripts": {
-    "dev:lint:eslint": "eslint src/*.mjs src/**/*.mjs server/*.mjs server/**/*.js",
-    "dev:lint:standardjs": "standard src/*.mjs src/**/*.mjs server/*.mjs server/**/*.js",
+    "dev:lint:eslint": "eslint src/*.mjs src/**/*.mjs server/*.mjs server/**/*.js bin/*.mjs",
+    "dev:lint:standardjs": "standard src/*.mjs src/**/*.mjs server/*.mjs server/**/*.js bin/*.mjs",
     "start": "cd server && node index.mjs",
     "start:dev": "cd server && node --watch index.mjs"
   },
