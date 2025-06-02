@@ -52,8 +52,8 @@ export default function (stream) {
     }
 
     prevLineCount = 0
-    for (let i = 0; i < prevLines.length; i++) {
-      prevLineCount += Math.ceil(stringWidth(prevLines[i]) / stream.columns) || 1
+    for (const prevLine of prevLines) {
+      prevLineCount += Math.ceil(stringWidth(prevLine) / stream.columns) || 1
     }
   }
 
