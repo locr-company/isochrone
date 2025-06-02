@@ -41,7 +41,7 @@
     "cors": "~2.8",
     "express": "~4.21",
     "lodash": "~4.17",
-    "yargs": "~17.7"
+    "yargs": "~18.0"
   },
   "peerDependencies": {
     "leaflet": "^1.7"
